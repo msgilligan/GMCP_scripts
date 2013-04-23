@@ -3,11 +3,15 @@ class Main
 {
 	public static void main(args)
 	{
-		println "MAIN IS RUNNING!"
 		downloadStuff()
 		println "COMPLETE!"
 	}
-
+	
+	def static decompile()
+	{
+		//
+	}
+	
 	def static downloadStuff()
 	{
 		def root = new File("tmp/bin")
@@ -17,10 +21,12 @@ class Main
 		ConfigParser parser = new ConfigParser("mc_versions.cfg")
 
 		def version = parser.getProperty("default", "current_ver")
+		println "downlaoding Minecraft"
 		Util.download(parser.getProperty(version, "client_url"), root.path+"/"+"minecraft.jar")
 
 		def dls = parser.getProperty("default", "libraries").split(/\s/)
 		def url = parser.getProperty("default", "base_url")
+		println "downlaoding libraries"
 		dls.each
 		{
 			Util.download(url+it, root.path+"/"+it)
@@ -28,6 +34,7 @@ class Main
 
 		def operating = Util.getOS();
 
+		println "downlaoding natives"
 		def natives = parser.getProperty("default", "natives").split(/\s/)[operating.ordinal()]
 		Util.download(url+natives, "tmp/"+natives)
 
