@@ -72,6 +72,8 @@ class Util
 				new File(outputDir+"/"+it) << zipFile.getInputStream(it).bytes
 			}
 		}
+		
+		zipFile.close()
 	}
 
 	enum os
