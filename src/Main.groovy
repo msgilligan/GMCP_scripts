@@ -32,11 +32,11 @@ class Main
 		def natives = parser.getProperty("default", "natives").split(/\s/)[operating.ordinal()]
 		Util.download(url+natives, "tmp/"+natives)
 		
-		def nDir = new File("mc/bin/natives")
+		def nDir = new File("tmp/bin/natives")
 		if (!nDir.exists() || !nDir.isDirectory())
 			nDir.mkdirs()
 
-		Util.unzip(natives, nDir.path);
-		new File(natives).delete();
+		Util.unzip("tmp/"+natives, nDir.path);
+		new File("tmp/"+natives).delete();
 	}
 }
