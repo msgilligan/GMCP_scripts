@@ -1,3 +1,4 @@
+package com.github.abrarsyed.gmcp
 class ConfigParser
 {
 	private String file;

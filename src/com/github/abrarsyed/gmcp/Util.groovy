@@ -1,3 +1,4 @@
+package com.github.abrarsyed.gmcp
 import java.security.MessageDigest
 
 class Util
@@ -60,17 +61,25 @@ class Util
 		long delta = System.currentTimeMillis()-start
 	}
 
-	def static unzip(file, outputDir)
+	def static unzip(file, outputDir, stripMeta)
 	{
 		def zipFile = new java.util.zip.ZipFile(new File(file))
 	
 		zipFile.entries().each
 		{
 			def name = it.name;
-			if (!name.contains("META-INF") && !name.endsWith("/"))
+			
+			if (name.endsWith("/") || (stripMeta && name.contains("META-INF")))
 			{
-				new File(outputDir+"/"+it) << zipFile.getInputStream(it).bytes
+				return
 			}
+			
+			if (name.contains("/"))
+			{
+				new File(outputDir+"/"+it).getParentFile().mkdirs();
+			}
+				
+			new File(outputDir+"/"+it) << zipFile.getInputStream(it).bytes
 		}
 		
 		zipFile.close()
