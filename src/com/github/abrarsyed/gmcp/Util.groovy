@@ -86,10 +86,10 @@ class Util
 
 			if (name.contains("/"))
 			{
-				new File(outputDir, it).getParentFile().mkdirs();
+				new File(outputDir, name).getParentFile().mkdirs();
 			}
 
-			new File(outputDir, it) << zipFile.getInputStream(it).bytes
+			new File(outputDir, name) << zipFile.getInputStream(it).bytes
 		}
 
 		zipFile.close()

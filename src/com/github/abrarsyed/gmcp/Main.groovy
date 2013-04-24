@@ -3,7 +3,7 @@ package com.github.abrarsyed.gmcp
 class Main
 {
 	public static final File tmp = new File("tmp");
-	public static final File resources = new File("tmp");
+	public static final File resources = new File("resources");
 	
 	public static void main(args)
 	{
@@ -11,11 +11,11 @@ class Main
 
 		println "DeObfuscating With Rettrogaurd !!!!!!!!!!!!"
 
-		deobfuscate()
+		//deobfuscate()
 		
 		println "UNZIPPING !!!!!!!!!!!!"
 		
-		Util.unzip("tmp/bin/Minecraft.jar", "tmp/extracted", false)
+		Util.unzip(new File(tmp, "bin/Minecraft.jar"), new File(tmp, "extracted"), false)
 		
 		println "DECOMPILING !!!!!!!!!!!!"
 
@@ -26,8 +26,8 @@ class Main
 
 	def static decompile()
 	{
-		new File("tmp/decompiled").mkdirs();
-		JarBouncer.fernFlower("rmp/extracted", "tmp/decompiled");
+		new File(tmp, "decompiled").mkdirs();
+		JarBouncer.fernFlower("tmp/extracted", "tmp/decompiled");
 	}
 
 	def static deobfuscate()
