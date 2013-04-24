@@ -2,6 +2,9 @@ package com.github.abrarsyed.gmcp
 
 class Main
 {
+	public static final File tmp = new File("tmp");
+	public static final File resources = new File("tmp");
+	
 	public static void main(args)
 	{
 		//downloadStuff()
@@ -41,35 +44,32 @@ class Main
 
 	def static downloadStuff()
 	{
-		def root = new File("tmp/bin")
+		def root = new File(tmp, "jars")
 		if (!root.exists() || !root.isDirectory())
 			root.mkdirs()
 
-		ConfigParser parser = new ConfigParser("mc_versions.cfg")
+		ConfigParser parser = new ConfigParser(resources.path+"mc_versions.cfg")
 
 		def version = parser.getProperty("default", "current_ver")
 		println "downloading Minecraft"
-		Util.download(parser.getProperty(version, "client_url"), root.path+"/"+"minecraft.jar")
+		Util.download(parser.getProperty(version, "client_url"), new File(root, "minecraft.jar"))
 
 		def dls = parser.getProperty("default", "libraries").split(/\s/)
 		def url = parser.getProperty("default", "base_url")
 		println "downloading libraries"
 		dls.each
 		{
-			Util.download(url+it, root.path+"/"+it)
+			Util.download(url+it, new File(root, it))
 		}
 
 		def operating = Util.getOS();
 
 		println "downlaoding natives"
-		def natives = parser.getProperty("default", "natives").split(/\s/)[operating.ordinal()]
-		Util.download(url+natives, "tmp/"+natives)
+		dls = parser.getProperty("default", "natives").split(/\s/)[operating.ordinal()]
+		File nDL = new File(tmp, dls);
+		Util.download(url+dls, nDL)
 
-		def nDir = new File("tmp/bin/natives")
-		if (!nDir.exists() || !nDir.isDirectory())
-			nDir.mkdirs()
-
-		Util.unzip("tmp/"+natives, nDir.path, true)
-		new File("tmp/"+natives).delete()
+		Util.unzip(nDL, new File(root, "natives"), true)
+		nDL.delete()
 	}
 }

@@ -1,10 +1,12 @@
 package com.github.abrarsyed.gmcp
+
 import java.security.MessageDigest
+import java.util.zip.ZipEntry
 
 class Util
 {
 
-	def static download(String url, String filename )
+	def static download(String url, File output)
 	{
 		while(url)
 		{
@@ -14,7 +16,7 @@ class Util
 				url = conn.getHeaderField( "Location" )
 				if( !url )
 				{
-					new File( filename ).withOutputStream
+					output.withOutputStream
 					{ out ->
 						conn.inputStream.with
 						{ inp ->
@@ -41,7 +43,7 @@ class Util
 			return null
 	}
 
-	def static getSha1(file)
+	def static getSha1(String file)
 	{
 		int KB = 1024
 		int MB = 1024*KB
@@ -61,27 +63,35 @@ class Util
 		long delta = System.currentTimeMillis()-start
 	}
 
-	def static unzip(file, outputDir, stripMeta)
+	/**
+	 * 
+	 * @param input      File object of input zip
+	 * @param outputDir  File obecjt of output directory
+	 * @param stripMeta  Strip the MetaINF or not..
+	 */
+	def static void unzip(File input, File outputDir, boolean stripMeta)
 	{
-		def zipFile = new java.util.zip.ZipFile(new File(file))
-	
+		def zipFile = new java.util.zip.ZipFile(input)
+		
+		outputDir.mkdirs();
+
 		zipFile.entries().each
 		{
-			def name = it.name;
-			
+			def name = ((ZipEntry)it).name;
+
 			if (name.endsWith("/") || (stripMeta && name.contains("META-INF")))
 			{
 				return
 			}
-			
+
 			if (name.contains("/"))
 			{
-				new File(outputDir+"/"+it).getParentFile().mkdirs();
+				new File(outputDir, it).getParentFile().mkdirs();
 			}
-				
-			new File(outputDir+"/"+it) << zipFile.getInputStream(it).bytes
+
+			new File(outputDir, it) << zipFile.getInputStream(it).bytes
 		}
-		
+
 		zipFile.close()
 	}
 
