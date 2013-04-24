@@ -3,23 +3,30 @@ package com.github.abrarsyed.gmcp
 class Main
 {
 	public static void main(args)
-	{	
+	{
 		//downloadStuff()
-		
+
 		println "decompiling !!!!!!!!!!!!"
+
+		deobfuscate()
+
+		Util.unzip("tmp/bin/Minecraft.jar", "tmp/extracted", false)
+
 		decompile()
-		
+
 		println "COMPLETE!"
 	}
-	
+
 	def static decompile()
 	{
-		Util.unzip("tmp/bin/Minecraft.jar", "tmp/extracted", false)
-		
 		new File("tmp/decompiled").mkdirs();
 		JarBouncer.fernFlower("rmp/extracted", "tmp/decompiled");
 	}
-	
+
+	def static deobfuscate()
+	{
+	}
+
 	def static downloadStuff()
 	{
 		def root = new File("tmp/bin")
