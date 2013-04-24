@@ -6,11 +6,15 @@ class Main
 	{
 		//downloadStuff()
 
-		println "decompiling !!!!!!!!!!!!"
+		println "DeObfuscating With Rettrogaurd !!!!!!!!!!!!"
 
 		deobfuscate()
-
+		
+		println "UNZIPPING !!!!!!!!!!!!"
+		
 		Util.unzip("tmp/bin/Minecraft.jar", "tmp/extracted", false)
+		
+		println "DECOMPILING !!!!!!!!!!!!"
 
 		decompile()
 
@@ -25,6 +29,14 @@ class Main
 
 	def static deobfuscate()
 	{
+		def cp = new StringBuilder();
+		cp.append("tmp/bin/minecraft.jar").append(',')
+		cp.append("tmp/bin/jinput.jar").append(',')
+		cp.append("tmp/bin/lwjgl.jar").append(',')
+		cp.append("tmp/bin/lwjgl_util.jar")
+
+		// %(DirJars)s/bin/minecraft.jar,%(DirJars)s/bin/jinput.jar,%(DirJars)s/bin/lwjgl.jar,%(DirJars)s/bin/lwjgl_util.jar
+		JarBouncer.retroGuardDeObf(cp.toString(), "tmp/SRGs/client_rg.cfg");
 	}
 
 	def static downloadStuff()

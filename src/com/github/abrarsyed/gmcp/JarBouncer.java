@@ -21,19 +21,19 @@ public class JarBouncer
 		// -din=0 -rbr=0 -dgs=1 -asc=1 -log=WARN {indir} {outdir}
 	}
 
-	public static void retrogauardDeObf(String classPath, String confFile) throws Exception
+	public static void retroGuardDeObf(String classPath, String confFile) throws Exception
 	{
 		String[] args = new String[5];
-		args[0] = "-cp";
-		args[1] = classPath;
-		args[2] = "RetroGaurd";
-		args[3] = "-searge";
-		args[4] = confFile;
+		//args[0] = "-cp";
+		//args[1] = classPath;
+		//args[2] = "RetroGaurd";
+		args[0] = "-searge";
+		args[1] = confFile;
 		invokeRG(args);
 		// -cp "{classpath}" RetroGuard -searge {conffile}
 	}
 
-	public static void retrogauardReObf(String classPath, String confFile) throws Exception
+	public static void retroGuardReObf(String classPath, String confFile) throws Exception
 	{
 		String[] args = new String[5];
 		args[0] = "-cp";
@@ -47,7 +47,8 @@ public class JarBouncer
 
 	private static void invokeRG(String[] args) throws Exception
 	{
-		Method main = Class.forName("RetroGaurd").getDeclaredMethod("main", String[].class);
+		Method main = Class.forName("RetroGuard").getDeclaredMethod("main", String[].class);
 		main.invoke(null, new Object[] { args });
+		System.out.println("DONE!");
 	}
 }
