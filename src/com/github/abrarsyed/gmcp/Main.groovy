@@ -1,7 +1,5 @@
 package com.github.abrarsyed.gmcp
 
-import de.fernflower.main.decompiler.ConsoleDecompiler;
-
 class Main
 {
 	public static void main(args)
@@ -19,17 +17,7 @@ class Main
 		Util.unzip("tmp/bin/Minecraft.jar", "tmp/extracted", false)
 		
 		new File("tmp/decompiled").mkdirs();
-		
-		def args = new String[7]
-		args[0] = "-din=0"
-		args[1] = "-rbr=0"
-		args[2] = "-dgs=1"
-		args[3] = "-asc=1"
-		args[4] = "-log=WARN"
-		args[5] = "tmp/extracted"
-		args[6] = "tmp/decompiled"
-		ConsoleDecompiler.main(args);
-		// %s -din=0 -rbr=0 -dgs=1 -asc=1 -log=WARN {indir} {outdir}
+		JarBouncer.fernFlower("rmp/extracted", "tmp/decompiled");
 	}
 	
 	def static downloadStuff()
