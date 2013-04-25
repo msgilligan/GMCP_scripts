@@ -11,7 +11,7 @@ class Main
 
 		println "DeObfuscating With Rettrogaurd !!!!!!!!!!!!"
 
-		//deobfuscate()
+		deobfuscate()
 		
 		println "UNZIPPING !!!!!!!!!!!!"
 		
@@ -39,7 +39,9 @@ class Main
 		cp.append("tmp/bin/lwjgl_util.jar")
 
 		// %(DirJars)s/bin/minecraft.jar,%(DirJars)s/bin/jinput.jar,%(DirJars)s/bin/lwjgl.jar,%(DirJars)s/bin/lwjgl_util.jar
-		JarBouncer.retroGuardDeObf(cp.toString(), "tmp/SRGs/client_rg.cfg");
+		//JarBouncer.retroGuardDeObf(cp.toString(), resources.path+"/srgs/client_rg.cfg");
+		
+		
 	}
 
 	def static downloadStuff()
