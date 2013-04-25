@@ -7,15 +7,15 @@ class Main
 	
 	public static void main(args)
 	{
-		//downloadStuff()
+		downloadStuff()
 
-		println "DeObfuscating With Rettrogaurd !!!!!!!!!!!!"
+		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
 
 		deobfuscate()
 		
 		println "UNZIPPING !!!!!!!!!!!!"
 		
-		Util.unzip(new File(tmp, "bin/Minecraft.jar"), new File(tmp, "extracted"), false)
+		Util.unzip(new File(tmp, "Minecraft_ss.jar"), new File(tmp, "extracted"), false)
 		
 		println "DECOMPILING !!!!!!!!!!!!"
 
@@ -33,14 +33,14 @@ class Main
 	def static deobfuscate()
 	{
 		def cp = new StringBuilder();
-		cp.append("tmp/bin/minecraft.jar").append(',')
-		cp.append("tmp/bin/jinput.jar").append(',')
-		cp.append("tmp/bin/lwjgl.jar").append(',')
-		cp.append("tmp/bin/lwjgl_util.jar")
+		cp.append("tmp/jars/Minecraft.jar").append(',')
+		cp.append("tmp/jars/jinput.jar").append(',')
+		cp.append("tmp/jars/lwjgl.jar").append(',')
+		cp.append("tmp/jars/lwjgl_util.jar")
 
 		// %(DirJars)s/bin/minecraft.jar,%(DirJars)s/bin/jinput.jar,%(DirJars)s/bin/lwjgl.jar,%(DirJars)s/bin/lwjgl_util.jar
 		//JarBouncer.retroGuardDeObf(cp.toString(), resources.path+"/srgs/client_rg.cfg");
-		
+		JarBouncer.specialSourceDeObf(new File(tmp, "jars/Minecraft.jar"), new File(tmp, "Minecraft_ss.jar"), new File(resources, "srgs/client.srg"));
 		
 	}
 
@@ -50,11 +50,11 @@ class Main
 		if (!root.exists() || !root.isDirectory())
 			root.mkdirs()
 
-		ConfigParser parser = new ConfigParser(resources.path+"mc_versions.cfg")
+		ConfigParser parser = new ConfigParser(resources.path+"/mc_versions.cfg")
 
 		def version = parser.getProperty("default", "current_ver")
 		println "downloading Minecraft"
-		Util.download(parser.getProperty(version, "client_url"), new File(root, "minecraft.jar"))
+		Util.download(parser.getProperty(version, "client_url"), new File(root, "Minecraft.jar"))
 
 		def dls = parser.getProperty("default", "libraries").split(/\s/)
 		def url = parser.getProperty("default", "base_url")
