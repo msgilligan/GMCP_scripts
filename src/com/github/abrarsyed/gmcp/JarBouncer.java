@@ -36,7 +36,7 @@ public class JarBouncer
 		}
 	}
 
-	public static void specialSourceDeObf(File inJar, File outJar, File srg)
+	public static void specialSource(File inJar, File outJar, File srg)
 	{
 		try
 		{
