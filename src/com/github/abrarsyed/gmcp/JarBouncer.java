@@ -2,6 +2,7 @@ package com.github.abrarsyed.gmcp;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 
 import net.md_5.specialsource.SpecialSource;
 import de.fernflower.main.decompiler.ConsoleDecompiler;
@@ -23,7 +24,7 @@ public class JarBouncer
 		try
 		{
 			PrintStream stream = System.out;
-			System.setOut(new PrintStream("tmp/logs/FF.log"));
+			System.setOut(new PrintStream(new File(Main.logs, "FF.log")));
 
 			ConsoleDecompiler.main(args);
 			// -din=0 -rbr=0 -dgs=1 -asc=1 -log=WARN {indir} {outdir}
@@ -41,10 +42,33 @@ public class JarBouncer
 		try
 		{
 			SpecialSource.main(new String[] { "-i=" + inJar.getPath(), "-o=" + outJar.getPath(), "-m=" + srg.getPath() });
-			System.out.println("WORKED!");
 		}
 		catch (Exception e)
 		{
+			System.err.println("SpecialSource remapping has failed!");
+			e.printStackTrace();
+		}
+	}
+	
+	public static void injector(File input, File output, File config)
+	{
+		String[] args =  new String[]
+			{
+				input.getPath(),
+				output.getPath(),
+				config.getPath(),
+				new File(Main.logs, "MCInjector.log").getPath()
+			};
+		// {input} {output} {conf} {log}
+		try
+		{
+			Class<?> c = Class.forName("MCInjector");
+			Method m = c.getMethod("main", new Class[]{String[].class});
+			m.invoke(null, new Object[] {args});
+		}
+		catch (Exception e)
+		{
+			System.err.println("MCInjector has failed!");
 			e.printStackTrace();
 		}
 	}
