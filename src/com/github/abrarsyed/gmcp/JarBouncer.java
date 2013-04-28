@@ -38,14 +38,14 @@ public class JarBouncer
 
 	public static void specialSource(File inJar, File outJar, File srg)
 	{
-		try
-		{
-			SpecialSource.main(new String[] { "-i=" + inJar.getPath(), "-o=" + outJar.getPath(), "-m=" + srg.getPath() });
-			System.out.println("WORKED!");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+			try
+			{
+				SpecialSource.main(inJar, outJar, srg);
+			}
+			catch (Exception e)
+			{
+				System.out.println("SPECIAL SOURCE HAS FAILED!");
+				e.printStackTrace();
+			}
 	}
 }
