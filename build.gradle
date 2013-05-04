@@ -19,7 +19,7 @@ repositories {
 dependencies {
 	runtime fileTree(dir: 'lib', include: '*.jar')
 	
-	compile gradleApi()
+	// compile gradleApi()
 	
 	compile project('SpecialSource')
 
