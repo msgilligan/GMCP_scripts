@@ -38,3 +38,29 @@ Thumbs.db
 
 # Folder config file
 Desktop.ini
+
+###########
+## NetBeans
+###########
+/nbproject
+/nbactions.xml
+/nb-configuration.xml
+
+###########
+## Building
+###########
+/build
+.gradle
+
+############
+## Mac
+############
+/.DS_Store
+
+###########
+## IntelliJ
+###########
+*.iml
+*.ipr
+*.iws
+.idea/
