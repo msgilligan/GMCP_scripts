@@ -1,5 +1,7 @@
 package com.github.abrarsyed.gmcp
 
+import au.com.bytecode.opencsv.CSVReader
+
 class Main
 {
 	public static final File tmp = new File("tmp");
@@ -50,12 +52,19 @@ class Main
 		// %(DirJars)s/bin/minecraft.jar,%(DirJars)s/bin/jinput.jar,%(DirJars)s/bin/lwjgl.jar,%(DirJars)s/bin/lwjgl_util.jar
 		//JarBouncer.retroGuardDeObf(cp.toString(), resources.path+"/srgs/client_rg.cfg");
 		JarBouncer.specialSource(new File(tmp, "jars/Minecraft.jar"), new File(tmp, "Minecraft_ss.jar"), new File(resources, "srgs/client.srg"));
-		
 	}
 	
 	def static inject()
 	{
 		JarBouncer.injector(new File(tmp, "Minecraft_ss.jar"), new File(tmp, "Minecraft_exc.jar"), new File(resources, "joined.exc"))
+	}
+	
+	def static generateSRGs()
+	{
+		def reader = new CSVReader();
+		def elements = reader.readAll();
+		
+		
 	}
 
 	def static downloadStuff()
