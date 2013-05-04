@@ -41,7 +41,7 @@ public class JarBouncer
 	{
 		try
 		{
-			SpecialSource.main(new String[] { "-i=" + inJar.getPath(), "-o=" + outJar.getPath(), "-m=" + srg.getPath() });
+			SpecialSource.main(inJar, outJar, srg);
 		}
 		catch (Exception e)
 		{
@@ -49,22 +49,22 @@ public class JarBouncer
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void injector(File input, File output, File config)
 	{
-		String[] args =  new String[]
-			{
+		String[] args = new String[]
+		{
 				input.getPath(),
 				output.getPath(),
 				config.getPath(),
 				new File(Main.logs, "MCInjector.log").getPath()
-			};
+		};
 		// {input} {output} {conf} {log}
 		try
 		{
 			Class<?> c = Class.forName("MCInjector");
-			Method m = c.getMethod("main", new Class[]{String[].class});
-			m.invoke(null, new Object[] {args});
+			Method m = c.getMethod("main", new Class[] { String[].class });
+			m.invoke(null, new Object[] { args });
 		}
 		catch (Exception e)
 		{
