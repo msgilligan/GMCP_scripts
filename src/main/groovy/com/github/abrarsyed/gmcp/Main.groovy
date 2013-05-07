@@ -43,14 +43,6 @@ class Main
 
 	def static deobfuscate()
 	{
-		def cp = new StringBuilder();
-		cp.append("tmp/jars/Minecraft.jar").append(',')
-		cp.append("tmp/jars/jinput.jar").append(',')
-		cp.append("tmp/jars/lwjgl.jar").append(',')
-		cp.append("tmp/jars/lwjgl_util.jar")
-
-		// %(DirJars)s/bin/minecraft.jar,%(DirJars)s/bin/jinput.jar,%(DirJars)s/bin/lwjgl.jar,%(DirJars)s/bin/lwjgl_util.jar
-		//JarBouncer.retroGuardDeObf(cp.toString(), resources.path+"/srgs/client_rg.cfg");
 		JarBouncer.specialSource(new File(tmp, "jars/Minecraft.jar"), new File(tmp, "Minecraft_ss.jar"), new File(resources, "srgs/client.srg"));
 	}
 
