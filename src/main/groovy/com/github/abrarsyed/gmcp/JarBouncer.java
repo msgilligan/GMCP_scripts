@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 
+import net.md_5.specialsource.SpecialSource;
 import de.fernflower.main.decompiler.ConsoleDecompiler;
 
 public class JarBouncer
@@ -40,7 +41,7 @@ public class JarBouncer
 	{
 		try
 		{
-			//SpecialSource.main(new String[] { "-i=" + inJar.getPath(), "-o=" + outJar.getPath(), "-m=" + srg.getPath() });
+			SpecialSource.main(new String[] { "-i=" + inJar.getPath(), "-o=" + outJar.getPath(), "-m=" + srg.getPath() });
 		}
 		catch (Exception e)
 		{
