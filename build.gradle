@@ -31,4 +31,6 @@ dependencies {
 	compile 'com.googlecode.java-diff-utils:diffutils:1.2'
 	
 	compile 'org.projectlombok:lombok:0.11.6'
+	
+	compile 'org.eclipse.jdt:core:3.3.0-v_771'
 }
