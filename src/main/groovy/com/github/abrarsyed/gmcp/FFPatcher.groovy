@@ -37,33 +37,14 @@ class FFPatcher
 		enumVals: "(?m)^ {3}// \\\$FF: synthetic field\\n {3}private static final %s\\[\\] [\\w\$]+ = new %s\\[\\]\\{.*?\\};\\n",
 	];
 
-	//	def _process_file(src_file):
-	//	class_name = os.path.splitext(os.path.basename(src_file))[0]
-	//	tmp_file = src_file + '.tmp'
-	//	with open(src_file, 'r') as fh:
-	//		buf = fh.read()
-	//
-	//	buf = _REGEXP['trailing'].sub(r'', buf)
-	//
-	//	buf = _REGEXP['enum_class'].sub(enum_match, buf)
-	//
-	//	buf = _REGEXP['empty_super'].sub(r'', buf)
-	//
-	//	buf = _REGEXP['trailingzero'].sub(r'\g<value>\g<type>', buf)
-	//
-	//	buf = _REGEXP['newlines'].sub(r'\n', buf)
-	//
-	//	with open(tmp_file, 'w') as fh:
-	//		fh.write(buf)
-	//	shutil.move(tmp_file, src_file)
-
 	def processFile(File file)
 	{
 		def classname = file.getName().split(/\./)[0];
 		def text = file.text;
+
 		text.replaceAll(REG["trailing"], "");
 
-		def enumMatch  =
+		text.findAll(REG["enum_class"])
 		{ Matcher match->
 
 			if (classname != match.group('name'))
@@ -88,6 +69,12 @@ class FFPatcher
 			return processEnum(classname, match.group('type'), mods, interfaces, match.group['body'], match.group['end'])
 		};
 
+		text.replaceAll(REG["empty_super"], "");
+		text.replaceAll(REG["trailingzero"], "");
+		text.replaceAll(REG["newlines"], "\n");
+		text.replaceAll(REG["trailing"], "");
+		
+		file.write(text);
 	}
 
 	def processEnum(classname, classtype, List modifiers, List interfaces, String body, end)
