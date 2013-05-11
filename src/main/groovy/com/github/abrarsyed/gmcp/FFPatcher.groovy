@@ -8,23 +8,21 @@ class FFPatcher
 {
 	static final MODIFIERS = /public|protected|private|static|abstract|final|native|synchronized|transient|volatile|strict/;
 	static final Map<String, String> REG = [
-		trailingzero: /(?<value>[0-9]+\.[0-9]*[1-9])0+(?<type>[DdFfEe])/,
-		empty_super: /(?m)^ +super\(\);\n'/,
 
 		// Remove trailing whitespace
 		trailing : /(?m)[ \t]+$/,
 
 		//Remove repeated blank lines
-		newlines: /(?m)^\n{2,}/,
+		newlines: /(?m)^/+System.lineSeparator+/{2,}/,
 
 		modifiers: /(/ + MODIFIERS + /) /,
 		list : /, /,
 
-		enum_class: /(?m)^(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)(?<type>enum) (?<name>[\w$]+)(?: implements (?<implements>[\w$.]+(?:, [\w$.]+)*))? \{\n(?<body>(?:.*?\n)*?)(?<end>\}\n+)/,
+		enum_class: /(?m)^(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)(?<type>enum) (?<name>[\w$]+)(?: implements (?<implements>[\w$.]+(?:, [\w$.]+)*))? \{/+System.lineSeparator+/(?<body>(?:.*?/+System.lineSeparator+/)*?)(?<end>\}/+System.lineSeparator+/+)/,
 
-		enum_entries: /(?m)^ {3}(?<name>[\w$]+)\("(?=name)", [0-9]+(?:, (?<body>.*?))?\)(?<end>(?:;|,)\n+)/,
+		enum_entries: /(?m)^ {3}(?<name>[\w$]+)\("(?=name)", [0-9]+(?:, (?<body>.*?))?\)(?<end>(?:;|,)/+System.lineSeparator+/+)/,
 
-		empty_super: /(?m)^ +super\(\);\n/,
+		empty_super: /(?m)^ +super\(\);/+System.lineSeparator,
 
 		// strip trailing 0 from doubles and floats to fix decompile differences on OSX
 		// 0.0010D => 0.001D
@@ -32,9 +30,9 @@ class FFPatcher
 	];
 
 	static final Map<String, String> REG_FORMAT = [
-		constructor : /(?m)^ {3}(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)%s\((?<parameters>.*?)\)(?: throws (?<throws>[\w$.]+(?:, [\w$.]+)*))? \{(?:(?<empty>\}\n+)|(?:(?<body>\n(?:.*?\n)*?)(?<end> {3}\}\n+)))/,
+		constructor : /(?m)^ {3}(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)%s\((?<parameters>.*?)\)(?: throws (?<throws>[\w$.]+(?:, [\w$.]+)*))? \{(?:(?<empty>\}/+System.lineSeparator+/+)|(?:(?<body>/+System.lineSeparator+/(?:.*?/+System.lineSeparator+/)*?)(?<end> {3}\}/+System.lineSeparator+/+)))/,
 
-		enumVals: "(?m)^ {3}// \\\$FF: synthetic field\\n {3}private static final %s\\[\\] [\\w\$]+ = new %s\\[\\]\\{.*?\\};\\n",
+		enumVals: "(?m)^ {3}// \\\$FF: synthetic field"+System.lineSeparator+" {3}private static final %s\\[\\] [\\w\$]+ = new %s\\[\\]\\{.*?\\};"+System.lineSeparator,
 	];
 
 	def static processDir(File dir)
@@ -81,7 +79,7 @@ class FFPatcher
 
 		text.replaceAll(REG["empty_super"], "");
 		text.replaceAll(REG["trailingzero"], "");
-		text.replaceAll(REG["newlines"], "\n");
+		text.replaceAll(REG["newlines"], System.lineSeparator);
 		text.replaceAll(REG["trailing"], "");
 
 		file.write(text);
@@ -161,7 +159,7 @@ class FFPatcher
 			out += ' implements '+interfaces.join(', ')
 		}
 
-		out += "{ \n${body}${end}"
+		out += "{ ${System.lineSeparator}${body}${end}"
 
 		return out;
 	}
