@@ -8,7 +8,7 @@ class FFPatcher
 {
 	static final MODIFIERS = /public|protected|private|static|abstract|final|native|synchronized|transient|volatile|strict/;
 	static final Map<String, String> REG = [
-		trailingzero: /(?P<value>[0-9]+\.[0-9]*[1-9])0+(?P<type>[DdFfEe])/,
+		trailingzero: /(?<value>[0-9]+\.[0-9]*[1-9])0+(?<type>[DdFfEe])/,
 		empty_super: /(?m)^ +super\(\);\n'/,
 
 		// Remove trailing whitespace
@@ -20,24 +20,34 @@ class FFPatcher
 		modifiers: /(/ + MODIFIERS + /) /,
 		list : /, /,
 
-		enum_class: /(?m)^(?P<modifiers>(?:(?:/ + MODIFIERS + /) )*)(?P<type>enum) (?P<name>[\w$]+)(?: implements (?P<implements>[\w$.]+(?:, [\w$.]+)*))? \{\n(?P<body>(?:.*?\n)*?)(?P<end>\}\n+)/,
+		enum_class: /(?m)^(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)(?<type>enum) (?<name>[\w$]+)(?: implements (?<implements>[\w$.]+(?:, [\w$.]+)*))? \{\n(?<body>(?:.*?\n)*?)(?<end>\}\n+)/,
 
-		enum_entries: /(?m)^ {3}(?P<name>[\w$]+)\("(?P=name)", [0-9]+(?:, (?P<body>.*?))?\)(?P<end>(?:;|,)\n+)/,
+		enum_entries: /(?m)^ {3}(?<name>[\w$]+)\("(?=name)", [0-9]+(?:, (?<body>.*?))?\)(?<end>(?:;|,)\n+)/,
 
 		empty_super: /(?m)^ +super\(\);\n/,
 
 		// strip trailing 0 from doubles and floats to fix decompile differences on OSX
 		// 0.0010D => 0.001D
-		trailingzero: /(?P<value>[0-9]+\.[0-9]*[1-9])0+(?P<type>[DdFfEe])/,
+		trailingzero: /(?<value>[0-9]+\.[0-9]*[1-9])0+(?<type>[DdFfEe])/,
 	];
 
 	static final Map<String, String> REG_FORMAT = [
-		constructor : /(?m)^ {3}(?P<modifiers>(?:(?:/ + MODIFIERS + /) )*)%s\((?P<parameters>.*?)\)(?: throws (?P<throws>[\w$.]+(?:, [\w$.]+)*))? \{(?:(?P<empty>\}\n+)|(?:(?P<body>\n(?:.*?\n)*?)(?P<end> {3}\}\n+)))/,
+		constructor : /(?m)^ {3}(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)%s\((?<parameters>.*?)\)(?: throws (?<throws>[\w$.]+(?:, [\w$.]+)*))? \{(?:(?<empty>\}\n+)|(?:(?<body>\n(?:.*?\n)*?)(?<end> {3}\}\n+)))/,
 
 		enumVals: "(?m)^ {3}// \\\$FF: synthetic field\\n {3}private static final %s\\[\\] [\\w\$]+ = new %s\\[\\]\\{.*?\\};\\n",
 	];
 
-	def processFile(File file)
+	def static processDir(File dir)
+	{
+		dir.eachFile {
+			if (it.isDirectory())
+				processDir(it)
+			else if (it.getPath().endsWith(".java"))
+				processFile(it);
+		}
+	}
+
+	def static processFile(File file)
 	{
 		def classname = file.getName().split(/\./)[0];
 		def text = file.text;
@@ -73,11 +83,11 @@ class FFPatcher
 		text.replaceAll(REG["trailingzero"], "");
 		text.replaceAll(REG["newlines"], "\n");
 		text.replaceAll(REG["trailing"], "");
-		
+
 		file.write(text);
 	}
 
-	def processEnum(classname, classtype, List modifiers, List interfaces, String body, end)
+	def static processEnum(classname, classtype, List modifiers, List interfaces, String body, end)
 	{
 		body.eachMatch(end)
 		{ Matcher match ->
@@ -156,7 +166,7 @@ class FFPatcher
 		return out;
 	}
 
-	def processConstructor(classname, List<String> mods, List<String> params, List<String> exc, methodBody, methodEnd)
+	def static processConstructor(classname, List<String> mods, List<String> params, List<String> exc, methodBody, methodEnd)
 	{
 		if (params.size() >= 2)
 		{
@@ -166,7 +176,7 @@ class FFPatcher
 				params = params.subList(2, params.size()-1);
 
 				// empty constructor
-				if (Strings.isNullOrEmpty(body) && params.isEmpty())
+				if (Strings.isNullOrEmpty(methodBody) && params.isEmpty())
 				{
 					return '';
 				}
@@ -199,6 +209,6 @@ class FFPatcher
 			out += ' throws ${exc.join(", ")}'
 		}
 
-		out += ' {${body}${end}'
+		out += ' {${methodBody}${methodEnd}'
 	}
 }

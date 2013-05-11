@@ -31,6 +31,10 @@ class Main
 		println "DECOMPILING !!!!!!!!!!!!"
 
 		decompile()
+		
+		println "APPLY FF PATCHES!!!!!!!"
+		
+		FFPatcher.processDir(new File(tmp, "decompiled/net"))
 
 		println "COMPLETE!"
 	}
