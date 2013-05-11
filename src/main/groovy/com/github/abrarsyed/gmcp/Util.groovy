@@ -3,8 +3,6 @@ package com.github.abrarsyed.gmcp
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
 
-import com.google.common.io.Files
-
 class Util
 {
 
@@ -31,18 +29,18 @@ class Util
 		}
 	}
 
-	public static getOS()
+	public static OS getOS()
 	{
 		def name = System.properties["os.name"].toLowerCase()
 
 		if (name.contains("windows"))
-			return os.WINDOWS
+			OS.WINDOWS
 		else if (name.contains("mac"))
-			return os.MAC
+			OS.MAC
 		else if (name.contains("nix"))
-			return os.LINUX.
-			else
-			return null
+			OS.LINUX
+		else
+			null
 	}
 
 	def static getSha1(String file)
@@ -74,7 +72,7 @@ class Util
 	def static void unzip(File input, File outputDir, boolean stripMeta)
 	{
 		def zipFile = new java.util.zip.ZipFile(input)
-		
+
 		outputDir.mkdirs();
 
 		zipFile.entries().each
@@ -97,7 +95,7 @@ class Util
 		zipFile.close()
 	}
 
-	enum os
+	enum OS
 	{
 		WINDOWS, MAC, LINUX
 	}
