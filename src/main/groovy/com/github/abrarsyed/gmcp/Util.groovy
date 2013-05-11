@@ -29,16 +29,16 @@ class Util
 		}
 	}
 
-	public static OS getOS()
+	public static OperatingSystem getOS()
 	{
-		def name = System.properties["os.name"].toLowerCase()
+		def name = System.properties["os.name"].toString().toLowerCase()
 
 		if (name.contains("windows"))
-			OS.WINDOWS
+			OperatingSystem.WINDOWS
 		else if (name.contains("mac"))
-			OS.MAC
+			OperatingSystem.MAC
 		else if (name.contains("nix"))
-			OS.LINUX
+			OperatingSystem.LINUX
 		else
 			null
 	}
@@ -95,7 +95,7 @@ class Util
 		zipFile.close()
 	}
 
-	enum OS
+	enum OperatingSystem
 	{
 		WINDOWS, MAC, LINUX
 	}

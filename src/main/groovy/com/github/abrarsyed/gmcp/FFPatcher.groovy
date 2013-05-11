@@ -13,7 +13,7 @@ class FFPatcher
 		trailing : /(?m)[ \t]+$/,
 
 		//Remove repeated blank lines
-		newlines: /(?m)^\n{2,}/,
+		newlines: /(?m)^(\r\n|\r|\n){2,}/,
 
 		modifiers: /(/ + MODIFIERS + /) /,
 		list : /, /,
@@ -54,7 +54,8 @@ class FFPatcher
 		def classname = file.getName().split(/\./)[0];
 		def text = file.text;
 
-		text.replaceAll(REG["trailing"], "");
+
+		text = text.replaceAll(REG["trailing"], "");
 
 		text.findAll(REG["enum_class"])
 				// modifiers, type, name, implements, body, end
@@ -77,13 +78,18 @@ class FFPatcher
 				interfaces = inters.findAll(REG['list']);
 			}
 
-			return processEnum(classname, type, mods, interfaces, body, end)
+			text.replace(match, processEnum(classname, type, mods, interfaces, body, end))
 		};
 
-		text.replaceAll(REG["empty_super"], "");
-		text.replaceAll(REG["trailingzero"], "");
-		text.replaceAll(REG["newlines"], System.lineSeparator);
-		text.replaceAll(REG["trailing"], "");
+		text = text.replaceAll(REG["empty_super"], "");
+		text = text.replaceAll(REG["trailingzero"], "");
+		text = text.replaceAll(REG["newlines"], System.lineSeparator);
+		text = text.replaceAll(REG["trailing"], "");
+
+		def sep = System.lineSeparator
+		def specialSep = "Z@Z@Z"
+
+		text = text.replaceAll(/(\r\n|\r|\n)/, sep)
 
 		file.write(text);
 	}
@@ -99,17 +105,14 @@ class FFPatcher
 				entryBody = "($matchBody)";
 			}
 
-			return '   ' + matchName + entryBody + matchEnd;
+			body.replace(match, '   ' + matchName + entryBody + matchEnd);
 		};
 
 		def valuesRegex = String.format(REG_FORMAT['enumVals'], classname, classname);
 		body.replaceAll(valuesRegex, "");
 
 		def conRegex = String.format(REG_FORMAT['constructor'], classname)
-
 		def match = Pattern.compile(conRegex).matcher(body);
-
-
 		// process constructors
 		while (match.find())
 		{
@@ -147,7 +150,7 @@ class FFPatcher
 				methodEnd = match.group('end')
 			}
 
-			return processConstructor(classname, mods, params, exc, methodBody, methodEnd)
+			body.replace(match.group(), processConstructor(classname, mods, params, exc, methodBody, methodEnd))
 		}
 
 		// rebuild enum
@@ -165,9 +168,9 @@ class FFPatcher
 			out += ' implements '+interfaces.join(', ')
 		}
 
-		out += "{ ${System.lineSeparator}${body}${end}"
+		out += "{ \n${body}${end}"
 
-		return out;
+		return out
 	}
 
 	def static processConstructor(classname, List<String> mods, List<String> params, List<String> exc, methodBody, methodEnd)
@@ -212,5 +215,7 @@ class FFPatcher
 		}
 
 		out += ' {${methodBody}${methodEnd}'
+
+		return out
 	}
 }

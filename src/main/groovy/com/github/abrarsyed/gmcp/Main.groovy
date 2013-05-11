@@ -1,5 +1,6 @@
 package com.github.abrarsyed.gmcp
 
+import com.github.abrarsyed.gmcp.Util.OperatingSystem
 import com.google.common.io.Files
 
 import difflib.DiffUtils
@@ -18,12 +19,16 @@ class Main
 	public static final File EXC_JAR = new File(tmp, "Minecraft_EXC.jar")
 
 	public static final File JAR = new File(tmp, "jars/Minecraft.jar")
+	
+	public static OperatingSystem os
 
 	public static void main(args)
 	{
-//		logs.mkdirs()
-//		tmp.mkdirs()
-//		resources.mkdirs()
+		os = Util.getOS()
+		
+		logs.mkdirs()
+		tmp.mkdirs()
+		resources.mkdirs()
 //
 //		downloadStuff()
 //
@@ -50,8 +55,8 @@ class Main
 //		println "APPLY FF FIXES!!!!!!!"
 //
 //		FFPatcher.processDir(sources)
-
-		println "APPLYING mcp PATCHES!!!!!!!"
+//
+		println "APPLYING MCP PATCHES!!!!!!!"
 
 		patch()
 
@@ -120,14 +125,47 @@ class Main
 	{
 		// USELESS!!!!
 		// have to generate diffs... maybe...
+		def rawPatch = Arrays.asList(new File(resources, "patches/client.patch").text.split(System.lineSeparator))
 		
-		def patchLines = Arrays.asList(new File(resources, "patches/client.patch").text.split(System.lineSeparator))
-		Patch patch = DiffUtils.parseUnifiedDiff(patchLines);
+		def patchMap = [:]
+		def patternDiff = /diff.*?minecraft\\(.+?) .*?/
+		def patternStart = /^\+\+\+/
 		
-		println "seems to have laoded patches"
+		def currentFile, startIndex = 0, endIndex = 0
+		rawPatch.eachWithIndex
+		{ obj, int i -> 
+			def matcher = obj =~ patternDiff;
+			if (matcher)
+			{
+				currentFile = matcher[0][1]
+				endIndex = i-1
+				if (endIndex > 0)
+				{
+					patchMap[currentFile] = DiffUtils.parseUnifiedDiff(rawPatch.subList(startIndex, endIndex))
+					endIndex = 0
+				}
+				return
+			}
+			
+			matcher = obj =~ patternStart
+			if (matcher)
+				{
+					startIndex = i+1
+				} 
+		}
 		
-		def currentLines = Arrays.asList(new File(sources, "net/minecraft/client/Minecraft.java").text.split(System.lineSeparator))
-		DiffUtils.patch(currentLines, patch)
+		println "seems to have loaded patches"
+		
+		def currentLines, newLines, text, file
+		patchMap.each
+		{
+			println "writing for "+it.getKey()
+			file = new File(sources, it.getKey())
+			currentLines = Arrays.asList(file.text.split(System.lineSeparator))
+			newLines = DiffUtils.patch(currentLines, it.getValue())
+			text = newLines.join(System.lineSeparator)
+			file.write(text);
+		}
 		
 		println "seems to have patched the lines now."
 	}
@@ -152,10 +190,8 @@ class Main
 			Util.download(url+it, new File(root, it))
 		}
 
-		def operating = Util.getOS();
-
 		println "downlaoding natives"
-		dls = parser.getProperty("default", "natives").split(/\s/)[operating.ordinal()]
+		dls = parser.getProperty("default", "natives").split(/\s/)[os.ordinal()]
 		File nDL = new File(tmp, dls);
 		Util.download(url+dls, nDL)
 
