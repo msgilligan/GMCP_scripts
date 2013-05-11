@@ -1,8 +1,9 @@
 package com.github.abrarsyed.gmcp
 
-import au.com.bytecode.opencsv.CSVReader
-
 import com.google.common.io.Files
+
+import difflib.DiffUtils
+import difflib.Patch
 
 class Main
 {
@@ -20,35 +21,39 @@ class Main
 
 	public static void main(args)
 	{
-		logs.mkdirs()
-		tmp.mkdirs()
-		resources.mkdirs()
+//		logs.mkdirs()
+//		tmp.mkdirs()
+//		resources.mkdirs()
+//
+//		downloadStuff()
+//
+//		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
+//
+//		deobfuscate()
+//
+//		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
+//
+//		inject()
+//
+//		println "UNZIPPING !!!!!!!!!!!!"
+//
+//		Util.unzip(EXC_JAR, extracted, false)
+//
+//		println "COPYING CLASSES!!!!!!!"
+//
+//		copyClasses(extracted, classes)
+//
+//		println "DECOMPILING !!!!!!!!!!!!"
+//
+//		decompile()
+//
+//		println "APPLY FF FIXES!!!!!!!"
+//
+//		FFPatcher.processDir(sources)
 
-		downloadStuff()
+		println "APPLYING mcp PATCHES!!!!!!!"
 
-		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
-
-		deobfuscate()
-
-		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
-
-		inject()
-
-		println "UNZIPPING !!!!!!!!!!!!"
-
-		Util.unzip(EXC_JAR, extracted, false)
-
-		println "COPYING CLASSES!!!!!!!"
-
-		copyClasses(extracted, classes)
-
-		println "DECOMPILING !!!!!!!!!!!!"
-
-		decompile()
-
-		println "APPLY FF PATCHES!!!!!!!"
-
-		FFPatcher.processDir(sources)
+		patch()
 
 		println "COMPLETE!"
 	}
@@ -111,16 +116,20 @@ class Main
 		}
 	}
 
-	def static readCSV()
+	def static patch()
 	{
-		def reader = new CSVReader();
-		def elements = reader.readAll();
-
-		elements.each
-		{
-			it.each
-			{ println it }
-		}
+		// USELESS!!!!
+		// have to generate diffs... maybe...
+		
+		def patchLines = Arrays.asList(new File(resources, "patches/client.patch").text.split(System.lineSeparator))
+		Patch patch = DiffUtils.parseUnifiedDiff(patchLines);
+		
+		println "seems to have laoded patches"
+		
+		def currentLines = Arrays.asList(new File(sources, "net/minecraft/client/Minecraft.java").text.split(System.lineSeparator))
+		DiffUtils.patch(currentLines, patch)
+		
+		println "seems to have patched the lines now."
 	}
 
 	def static downloadStuff()
