@@ -3,6 +3,8 @@ package com.github.abrarsyed.gmcp
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
 
+import com.google.common.io.Files
+
 class Util
 {
 

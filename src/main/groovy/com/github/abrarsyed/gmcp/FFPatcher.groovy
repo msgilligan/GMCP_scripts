@@ -1,6 +1,6 @@
 package com.github.abrarsyed.gmcp
 
-import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 import com.google.common.base.Strings
 
@@ -13,26 +13,30 @@ class FFPatcher
 		trailing : /(?m)[ \t]+$/,
 
 		//Remove repeated blank lines
-		newlines: /(?m)^/+System.lineSeparator+/{2,}/,
+		newlines: /(?m)^\n{2,}/,
 
 		modifiers: /(/ + MODIFIERS + /) /,
 		list : /, /,
 
-		enum_class: /(?m)^(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)(?<type>enum) (?<name>[\w$]+)(?: implements (?<implements>[\w$.]+(?:, [\w$.]+)*))? \{/+System.lineSeparator+/(?<body>(?:.*?/+System.lineSeparator+/)*?)(?<end>\}/+System.lineSeparator+/+)/,
+		// modifiers, type, name, implements, body, end
+		enum_class: /(?m)^((?:(?:/ + MODIFIERS + /) )*)(enum) ([\w$]+)(?: implements ([\w$.]+(?:, [\w$.]+)*))? \{\n((?:.*?\n)*?)(\}\n+)/,
 
-		enum_entries: /(?m)^ {3}(?<name>[\w$]+)\("(?=name)", [0-9]+(?:, (?<body>.*?))?\)(?<end>(?:;|,)/+System.lineSeparator+/+)/,
+		// name, body, end
+		enum_entries: /(?m)^ {3}([\w$]+)\("(?=name)", [0-9]+(?:, (.*?))?\)((?:;|,)\n+)/,
 
-		empty_super: /(?m)^ +super\(\);/+System.lineSeparator,
+		empty_super: /(?m)^ +super\(\);\n/,
 
 		// strip trailing 0 from doubles and floats to fix decompile differences on OSX
 		// 0.0010D => 0.001D
-		trailingzero: /(?<value>[0-9]+\.[0-9]*[1-9])0+(?<type>[DdFfEe])/,
+		// value, type
+		trailingzero: /([0-9]+\.[0-9]*[1-9])0+([DdFfEe])/,
 	];
 
 	static final Map<String, String> REG_FORMAT = [
-		constructor : /(?m)^ {3}(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)%s\((?<parameters>.*?)\)(?: throws (?<throws>[\w$.]+(?:, [\w$.]+)*))? \{(?:(?<empty>\}/+System.lineSeparator+/+)|(?:(?<body>/+System.lineSeparator+/(?:.*?/+System.lineSeparator+/)*?)(?<end> {3}\}/+System.lineSeparator+/+)))/,
+		// modifiers, params, throws, empty, body, end
+		constructor : /(?m)^ {3}(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)%s\((?<parameters>.*?)\)(?: throws (?<throws>[\w$.]+(?:, [\w$.]+)*))? \{(?:(?<empty>\}\n+)|(?:(?<body>\n(?:.*?\n)*?)(?<end> {3}\}\n+)))/,
 
-		enumVals: "(?m)^ {3}// \\\$FF: synthetic field"+System.lineSeparator+" {3}private static final %s\\[\\] [\\w\$]+ = new %s\\[\\]\\{.*?\\};"+System.lineSeparator,
+		enumVals: "(?m)^ {3}// \\\$FF: synthetic field\n {3}private static final %s\\[\\] [\\w\$]+ = new %s\\[\\]\\{.*?\\};\n",
 	];
 
 	def static processDir(File dir)
@@ -53,28 +57,27 @@ class FFPatcher
 		text.replaceAll(REG["trailing"], "");
 
 		text.findAll(REG["enum_class"])
-		{ Matcher match->
+				// modifiers, type, name, implements, body, end
+		{ match, modifiers, type, name, inters, body, end->
 
-			if (classname != match.group('name'))
+			if (classname != name)
 			{
-				println "ERROR PARSING ENUM !!!!! Class Name != File Name";
-				return;
+				throw new RuntimeException("ERROR PARSING ENUM !!!!! Class Name != File Name")
 			}
 
-			def mods = match.group('modifiers').findAll(REG['modifiers']);
-			if (match.group('modifiers') &&  mods.isEmpty())
+			def mods = modifiers.findAll(REG['modifiers']);
+			if (modifiers && !mods)
 			{
-				println "ERROR PARSING ENUM !!!!! no modifiers!";
-				return;
+				throw new RuntimeException("ERROR PARSING ENUM !!!!! no modifiers!")
 			}
 
 			def interfaces = []
-			if (match.group('implements'))
+			if (inters)
 			{
-				interfaces = match.group('implements').findAll(REG['list']);
+				interfaces = inters.findAll(REG['list']);
 			}
 
-			return processEnum(classname, match.group('type'), mods, interfaces, match.group['body'], match.group['end'])
+			return processEnum(classname, type, mods, interfaces, body, end)
 		};
 
 		text.replaceAll(REG["empty_super"], "");
@@ -87,26 +90,29 @@ class FFPatcher
 
 	def static processEnum(classname, classtype, List modifiers, List interfaces, String body, end)
 	{
-		body.eachMatch(end)
-		{ Matcher match ->
+		body.eachMatch("enum_entries")
+				// name, body, end
+		{ match, matchName, matchBody, matchEnd ->
 			def entryBody = '';
-			if (match.group('body'))
+			if (matchBody)
 			{
-				entryBody = "(${match.group('body')})";
+				entryBody = "($matchBody)";
 			}
 
-			return '   ' + match.group('name') + entryBody + match.group('end');
+			return '   ' + matchName + entryBody + matchEnd;
 		};
 
-		def valuesRegex = REG_FORMAT['enumVals'].format(classname, classname);
+		def valuesRegex = String.format(REG_FORMAT['enumVals'], classname, classname);
 		body.replaceAll(valuesRegex, "");
 
-		def conRegex = REG_FORMAT['constructor'].format(classname)
+		def conRegex = String.format(REG_FORMAT['constructor'], classname)
+
+		def match = Pattern.compile(conRegex).matcher(body);
+
 
 		// process constructors
-		body.eachMatch(conRegex)
-		{ Matcher match ->
-
+		while (match.find())
+		{
 			// check modifiers
 			def mods = match.group('modifiers').findAll(REG['modifiers']);
 			if (match.group('modifiers') &&  mods.isEmpty())
@@ -142,7 +148,7 @@ class FFPatcher
 			}
 
 			return processConstructor(classname, mods, params, exc, methodBody, methodEnd)
-		};
+		}
 
 		// rebuild enum
 		def out = ''
@@ -181,15 +187,13 @@ class FFPatcher
 			}
 			else
 			{
-				println "invalid initial parameters in enum"
-				return
+				throw new RuntimeException("invalid initial parameters in enum")
 			}
 			// ERROR
 		}
 		else
 		{
-			println "not enough parameters in enum"
-			return
+			throw new RuntimeException("not enough parameters in enum")
 		}
 
 		// reuild constructor
