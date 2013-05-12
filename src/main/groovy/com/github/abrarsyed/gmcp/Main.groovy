@@ -29,33 +29,33 @@ class Main
 		logs.mkdirs()
 		tmp.mkdirs()
 		resources.mkdirs()
-//
-//		downloadStuff()
-//
-//		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
-//
-//		deobfuscate()
-//
-//		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
-//
-//		inject()
-//
-//		println "UNZIPPING !!!!!!!!!!!!"
-//
-//		Util.unzip(EXC_JAR, extracted, false)
-//
-//		println "COPYING CLASSES!!!!!!!"
-//
-//		copyClasses(extracted, classes)
-//
-//		println "DECOMPILING !!!!!!!!!!!!"
-//
-//		decompile()
-//
-//		println "APPLY FF FIXES!!!!!!!"
-//
-//		FFPatcher.processDir(sources)
-//
+
+		downloadStuff()
+
+		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
+
+		deobfuscate()
+
+		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
+
+		inject()
+
+		println "UNZIPPING !!!!!!!!!!!!"
+
+		Util.unzip(EXC_JAR, extracted, false)
+
+		println "COPYING CLASSES!!!!!!!"
+
+		copyClasses(extracted, classes)
+
+		println "DECOMPILING !!!!!!!!!!!!"
+
+		decompile()
+
+		println "APPLY FF FIXES!!!!!!!"
+
+		FFPatcher.processDir(sources)
+
 		println "APPLYING MCP PATCHES!!!!!!!"
 
 		patch()
@@ -108,15 +108,15 @@ class Main
 	{
 		switch(str)
 		{
-			case ~".*?paulscode.*": return true
-			case ~".*?com/jcraft.*": return true
-			case ~".*?isom.*": return true
-			case ~".*?ibxm.*": return true
-			case ~".*?de/matthiasmann/twl.*": return true
-			case ~".*?org/xmlpull.*": return true
-			case ~".*?javax/xml.*": return true
-			case ~".*?com/fasterxml.*": return true
-			case ~".*?javax/ws.*": return true
+			case ~/.*?paulscode.*/: return true
+			case ~/.*?com\\jcraft.*/: return true
+			case ~/.*?isom.*/: return true
+			case ~/.*?ibxm.*/: return true
+			case ~/.*?de\\matthiasmann\\twl.*/: return true
+			case ~/.*?org\\xmlpull.*/: return true
+			case ~/.*?javax\\xml.*/: return true
+			case ~/.*?com\\fasterxml.*/: return true
+			case ~/.*?javax\\ws.*/: return true
 			default: return false
 		}
 	}
