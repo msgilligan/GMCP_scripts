@@ -18,6 +18,8 @@ repositories {
 }
 
 dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.0.5'
+
 	compile fileTree(dir: 'lib', include: '*.jar')
 	
 	// compile gradleApi()
