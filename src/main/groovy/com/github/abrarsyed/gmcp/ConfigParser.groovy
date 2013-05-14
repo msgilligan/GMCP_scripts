@@ -1,4 +1,7 @@
 package com.github.abrarsyed.gmcp
+
+import java.util.HashMap;
+
 class ConfigParser
 {
 	private String file;
@@ -39,7 +42,7 @@ class ConfigParser
 			}
 		}
 	}
-	
+
 	def getProperty(cat, key)
 	{
 		map.get(cat).get(key)

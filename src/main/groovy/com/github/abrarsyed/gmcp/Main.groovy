@@ -1,10 +1,8 @@
 package com.github.abrarsyed.gmcp
 
-import com.github.abrarsyed.gmcp.Util.OperatingSystem
-import com.google.common.io.Files
+import java.io.File;
 
-import difflib.DiffUtils
-import difflib.Patch
+import com.github.abrarsyed.gmcp.Util.OperatingSystem;
 
 class Main
 {
