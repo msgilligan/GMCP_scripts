@@ -36,7 +36,7 @@ class Util
 			OperatingSystem.WINDOWS
 		else if (name.contains("mac"))
 			OperatingSystem.MAC
-		else if (name.contains("nix"))
+		else if (name.contains("linux"))
 			OperatingSystem.LINUX
 		else
 			null
