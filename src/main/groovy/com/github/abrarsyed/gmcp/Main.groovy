@@ -1,6 +1,6 @@
 package com.github.abrarsyed.gmcp
 
-import java.io.File;
+import com.google.common.io.Files
 
 import com.github.abrarsyed.gmcp.Util.OperatingSystem;
 
