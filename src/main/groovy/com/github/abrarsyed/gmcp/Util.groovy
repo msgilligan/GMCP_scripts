@@ -55,7 +55,7 @@ class Util
 
 		f.eachByte(MB)
 		{ byte[] buf, int bytesRead ->
-			messageDigest.update(buf, 0, bytesRead);
+			messageDigest.update(buf, 0, bytesRead)
 		}
 
 		def sha1Hex = new BigInteger(1, messageDigest.digest()).toString(16).padLeft( 40, '0' )
@@ -72,11 +72,11 @@ class Util
 	{
 		def zipFile = new java.util.zip.ZipFile(input)
 
-		outputDir.mkdirs();
+		outputDir.mkdirs()
 
 		zipFile.entries().each
 		{
-			def name = ((ZipEntry)it).name;
+			def name = ((ZipEntry)it).name
 
 			if (name.endsWith("/") || (stripMeta && name.contains("META-INF")))
 			{
@@ -85,7 +85,7 @@ class Util
 
 			if (name.contains("/"))
 			{
-				new File(outputDir, name).getParentFile().mkdirs();
+				new File(outputDir, name).getParentFile().mkdirs()
 			}
 
 			new File(outputDir, name) << zipFile.getInputStream(it).bytes

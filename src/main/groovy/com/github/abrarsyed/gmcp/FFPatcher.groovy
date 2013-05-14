@@ -6,7 +6,7 @@ import com.google.common.base.Strings
 
 class FFPatcher
 {
-	static final MODIFIERS = /public|protected|private|static|abstract|final|native|synchronized|transient|volatile|strict/;
+	static final MODIFIERS = /public|protected|private|static|abstract|final|native|synchronized|transient|volatile|strict/
 	static final Map<String, String> REG = [
 
 		// Remove trailing whitespace
@@ -30,14 +30,14 @@ class FFPatcher
 		// 0.0010D => 0.001D
 		// value, type
 		trailingzero: /([0-9]+\.[0-9]*[1-9])0+([DdFfEe])/,
-	];
+	]
 
 	static final Map<String, String> REG_FORMAT = [
 		// modifiers, params, throws, empty, body, end
 		constructor : /(?m)^ {3}(?<modifiers>(?:(?:/ + MODIFIERS + /) )*)%s\((?<parameters>.*?)\)(?: throws (?<throws>[\w$.]+(?:, [\w$.]+)*))? \{(?:(?<empty>\}\n+)|(?:(?<body>\n(?:.*?\n)*?)(?<end> {3}\}\n+)))/,
 
 		enumVals: "(?m)^ {3}// \\\$FF: synthetic field\n {3}private static final %s\\[\\] [\\w\$]+ = new %s\\[\\]\\{.*?\\};\n",
-	];
+	]
 
 	def static processDir(File dir)
 	{
@@ -45,17 +45,17 @@ class FFPatcher
 			if (it.isDirectory())
 				processDir(it)
 			else if (it.getPath().endsWith(".java"))
-				processFile(it);
+				processFile(it)
 		}
 	}
 
 	def static processFile(File file)
 	{
-		def classname = file.getName().split(/\./)[0];
-		def text = file.text;
+		def classname = file.getName().split(/\./)[0]
+		def text = file.text
 
 
-		text = text.replaceAll(REG["trailing"], "");
+		text = text.replaceAll(REG["trailing"], "")
 
 		text.findAll(REG["enum_class"])
 				// modifiers, type, name, implements, body, end
@@ -66,7 +66,7 @@ class FFPatcher
 				throw new RuntimeException("ERROR PARSING ENUM !!!!! Class Name != File Name")
 			}
 
-			def mods = modifiers.findAll(REG['modifiers']);
+			def mods = modifiers.findAll(REG['modifiers'])
 			if (modifiers && !mods)
 			{
 				throw new RuntimeException("ERROR PARSING ENUM !!!!! no modifiers!")
@@ -75,23 +75,23 @@ class FFPatcher
 			def interfaces = []
 			if (inters)
 			{
-				interfaces = inters.findAll(REG['list']);
+				interfaces = inters.findAll(REG['list'])
 			}
 
 			text.replace(match, processEnum(classname, type, mods, interfaces, body, end))
-		};
+		}
 
-		text = text.replaceAll(REG["empty_super"], "");
-		text = text.replaceAll(REG["trailingzero"], "");
-		text = text.replaceAll(REG["newlines"], System.lineSeparator);
-		text = text.replaceAll(REG["trailing"], "");
+		text = text.replaceAll(REG["empty_super"], "")
+		text = text.replaceAll(REG["trailingzero"], "")
+		text = text.replaceAll(REG["newlines"], System.lineSeparator)
+		text = text.replaceAll(REG["trailing"], "")
 
 		def sep = System.lineSeparator
 		def specialSep = "Z@Z@Z"
 
 		text = text.replaceAll(/(\r\n|\r|\n)/, sep)
 
-		file.write(text);
+		file.write(text)
 	}
 
 	def static processEnum(classname, classtype, List modifiers, List interfaces, String body, end)
@@ -99,50 +99,50 @@ class FFPatcher
 		body.eachMatch("enum_entries")
 				// name, body, end
 		{ match, matchName, matchBody, matchEnd ->
-			def entryBody = '';
+			def entryBody = ''
 			if (matchBody)
 			{
-				entryBody = "($matchBody)";
+				entryBody = "($matchBody)"
 			}
 
-			body.replace(match, '   ' + matchName + entryBody + matchEnd);
-		};
+			body.replace(match, '   ' + matchName + entryBody + matchEnd)
+		}
 
-		def valuesRegex = String.format(REG_FORMAT['enumVals'], classname, classname);
-		body.replaceAll(valuesRegex, "");
+		def valuesRegex = String.format(REG_FORMAT['enumVals'], classname, classname)
+		body.replaceAll(valuesRegex, "")
 
 		def conRegex = String.format(REG_FORMAT['constructor'], classname)
-		def match = Pattern.compile(conRegex).matcher(body);
+		def match = Pattern.compile(conRegex).matcher(body)
 		// process constructors
 		while (match.find())
 		{
 			// check modifiers
-			def mods = match.group('modifiers').findAll(REG['modifiers']);
+			def mods = match.group('modifiers').findAll(REG['modifiers'])
 			if (match.group('modifiers') &&  mods.isEmpty())
 			{
-				println "ERROR PARSING ENUM CONSTRUCTOR! !!!!! no modifiers!";
-				return;
+				println "ERROR PARSING ENUM CONSTRUCTOR! !!!!! no modifiers!"
+				return
 			}
 
-			def params = [];
+			def params = []
 			if (match.group('parameters'))
 			{
-				println "ERROR PARSING ENUM CONSTRUCTOR! !!!!! no modifiers!";
-				params = match.group('parameters').split(REG['list']);
-				return;
+				println "ERROR PARSING ENUM CONSTRUCTOR! !!!!! no modifiers!"
+				params = match.group('parameters').split(REG['list'])
+				return
 			}
 
-			def exc = [];
+			def exc = []
 			if (match.group('throws'))
 			{
-				exc = match.group(['throws']).split(REG['list']);
+				exc = match.group(['throws']).split(REG['list'])
 			}
 
-			def methodBody, methodEnd;
+			def methodBody, methodEnd
 			if (!Strings.isNullOrEmpty(match.group('empty')))
 			{
-				methodBody = '';
-				methodEnd = match.group('empty');
+				methodBody = ''
+				methodEnd = match.group('empty')
 			}
 			else
 			{
@@ -161,7 +161,7 @@ class FFPatcher
 			out += modifiers.join(' ')
 		}
 
-		out += classtype + ' ' + classname;
+		out += classtype + ' ' + classname
 
 		if (!interfaces.isEmpty())
 		{
@@ -180,12 +180,12 @@ class FFPatcher
 			// special case?
 			if (params.get(0).startsWith('String ') && params.get(1).startsWith('int '))
 			{
-				params = params.subList(2, params.size()-1);
+				params = params.subList(2, params.size()-1)
 
 				// empty constructor
 				if (Strings.isNullOrEmpty(methodBody) && params.isEmpty())
 				{
-					return '';
+					return ''
 				}
 			}
 			else
@@ -201,7 +201,7 @@ class FFPatcher
 
 		// reuild constructor
 
-		def out = '   ';
+		def out = '   '
 		if (mods)
 		{
 			out += ' '+mods.join(" ")+' '

@@ -1,14 +1,15 @@
 package com.github.abrarsyed.gmcp
 
+import com.github.abrarsyed.gmcp.Util.OperatingSystem
 import com.google.common.io.Files
 
-import com.github.abrarsyed.gmcp.Util.OperatingSystem;
+import difflib.DiffUtils
 
 class Main
 {
-	public static final File tmp = new File("tmp");
-	public static final File resources = new File("resources");
-	public static final File logs = new File(tmp, "logs");
+	public static final File tmp = new File("tmp")
+	public static final File resources = new File("resources")
+	public static final File logs = new File(tmp, "logs")
 
 	public static final File extracted = new File(tmp, "extracted")
 	public static final File classes = new File(tmp, "classes")
@@ -17,13 +18,13 @@ class Main
 	public static final File EXC_JAR = new File(tmp, "Minecraft_EXC.jar")
 
 	public static final File JAR = new File(tmp, "jars/Minecraft.jar")
-	
+
 	public static OperatingSystem os
 
 	public static void main(args)
 	{
 		os = Util.getOS()
-		
+
 		logs.mkdirs()
 		tmp.mkdirs()
 		resources.mkdirs()
@@ -63,13 +64,13 @@ class Main
 
 	def static decompile()
 	{
-		sources.mkdirs();
-		JarBouncer.fernFlower(classes.getPath(), sources.getPath());
+		sources.mkdirs()
+		JarBouncer.fernFlower(classes.getPath(), sources.getPath())
 	}
 
 	def static deobfuscate()
 	{
-		JarBouncer.specialSource(JAR, SS_JAR, new File(resources, "srgs/client.srg"));
+		JarBouncer.specialSource(JAR, SS_JAR, new File(resources, "srgs/client.srg"))
 	}
 
 	def static inject()
@@ -79,25 +80,25 @@ class Main
 
 	def static copyClasses(File inDir, File outDir)
 	{
-		outDir.mkdirs();
+		outDir.mkdirs()
 
 		inDir.eachFileRecurse
 		{
 			// check ignored packages....
 			if (isIgnored(it.getPath()))
 			{
-				return;
+				return
 			}
 
 			def out = new File(it.getAbsolutePath().replace(inDir.absolutePath, outDir.absolutePath))
 			if (it.isFile() && Files.getFileExtension(it.getPath()) == "class")
 			{
-				out.createNewFile();
+				out.createNewFile()
 				Files.copy(it, out)
 			}
 			else if (it.isDirectory())
 			{
-				out.mkdirs();
+				out.mkdirs()
 			}
 		}
 	}
@@ -124,15 +125,15 @@ class Main
 		// USELESS!!!!
 		// have to generate diffs... maybe...
 		def rawPatch = Arrays.asList(new File(resources, "patches/client.patch").text.split(System.lineSeparator))
-		
+
 		def patchMap = [:]
 		def patternDiff = /diff.*?minecraft\\(.+?) .*?/
 		def patternStart = /^\+\+\+/
-		
+
 		def currentFile, startIndex = 0, endIndex = 0
 		rawPatch.eachWithIndex
-		{ obj, int i -> 
-			def matcher = obj =~ patternDiff;
+		{ obj, int i ->
+			def matcher = obj =~ patternDiff
 			if (matcher)
 			{
 				currentFile = matcher[0][1]
@@ -144,16 +145,16 @@ class Main
 				}
 				return
 			}
-			
+
 			matcher = obj =~ patternStart
 			if (matcher)
-				{
-					startIndex = i+1
-				} 
+			{
+				startIndex = i+1
+			}
 		}
-		
+
 		println "seems to have loaded patches"
-		
+
 		def currentLines, newLines, text, file
 		patchMap.each
 		{
@@ -162,9 +163,9 @@ class Main
 			currentLines = Arrays.asList(file.text.split(System.lineSeparator))
 			newLines = DiffUtils.patch(currentLines, it.getValue())
 			text = newLines.join(System.lineSeparator)
-			file.write(text);
+			file.write(text)
 		}
-		
+
 		println "seems to have patched the lines now."
 	}
 
@@ -190,7 +191,7 @@ class Main
 
 		println "downlaoding natives"
 		dls = parser.getProperty("default", "natives").split(/\s/)[os.ordinal()]
-		File nDL = new File(tmp, dls);
+		File nDL = new File(tmp, dls)
 		Util.download(url+dls, nDL)
 
 		Util.unzip(nDL, new File(root, "natives"), true)
