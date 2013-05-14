@@ -32,7 +32,6 @@ class Util
 	public static OperatingSystem getOS()
 	{
 		def name = System.properties["os.name"].toString().toLowerCase()
-
 		if (name.contains("windows"))
 			OperatingSystem.WINDOWS
 		else if (name.contains("mac"))
@@ -64,7 +63,7 @@ class Util
 	}
 
 	/**
-	 * 
+	 *
 	 * @param input      File object of input zip
 	 * @param outputDir  File obecjt of output directory
 	 * @param stripMeta  Strip the MetaINF or not..
@@ -95,7 +94,7 @@ class Util
 		zipFile.close()
 	}
 
-	enum OperatingSystem
+	static enum OperatingSystem
 	{
 		WINDOWS, MAC, LINUX
 	}
