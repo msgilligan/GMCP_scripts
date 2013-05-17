@@ -59,6 +59,10 @@ class Main
 
 		patch()
 
+		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
+
+		renameSources(sources)
+
 		println "COMPLETE!"
 	}
 
@@ -196,5 +200,19 @@ class Main
 
 		Util.unzip(nDL, new File(root, "natives"), true)
 		nDL.delete()
+	}
+
+	def static renameSources(File dir)
+	{
+		def methods = new File(resources, "csvs/methods.csv")
+		def fields = new File(resources, "csvs/fields.csv")
+		def params = new File(resources, "csvs/params.csv")
+
+		SourceRemapper remapper = new SourceRemapper(methods, fields, params)
+
+		dir.eachFileRecurse {
+			if (it.isFile())
+				remapper.remapFile(it)
+		}
 	}
 }
