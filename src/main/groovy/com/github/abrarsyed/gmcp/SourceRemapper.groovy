@@ -9,11 +9,11 @@ class SourceRemapper
 	def Map fields
 	def Map params
 
-	final String METHOD = /^( {4}|\t)(?:[\w]+ )*(/+METHOD_SMALL+/)\(/
-	final String FIELD = /^( {4}|\t)(?:[\w]+ )*(/+FIELD_SMALL+/) *(?:=|;)/
 	final String METHOD_SMALL = /func_[0-9]+_[a-zA-Z_]+/
 	final String FIELD_SMALL = /field_[0-9]+_[a-zA-Z_]+/
 	final String PARAM = /p_[\w]+_\d+_/
+	final String METHOD = /(?m)^((?: |\t)*)(?:\w+ )*(/+METHOD_SMALL+/)\(/
+	final String FIELD = /(?m)^((?: |\t)*)(?:\w+ )*(/+FIELD_SMALL+/) *(?:=|;)/
 
 	SourceRemapper(File methodCSV, File fieldCSV, File paramCSV)
 	{
@@ -42,37 +42,51 @@ class SourceRemapper
 	def remapFile(File file)
 	{
 		def text = file.text;file
-		def javadoc, newline
+		def newline
 
 		// search methods to javadoc
 		text.findAll(METHOD) { match, indent, name ->
-			// rename
-			newline = match.replaceAll(name, methods[name]['name'])
 
-			// get javadoc
-			javadoc = buildJavadoc(indent, methods[name]['javadoc'])
+			if (methods[name])
+			{
+				// rename
+				newline = match.replaceAll(name, methods[name]['name'])
 
-			// replace method in-file
-			text.replace(match, javadoc+newline)
+				// get javadoc
+				if (methods[name]['javadoc'])
+				{
+					newline = buildJavadoc(indent, methods[name]['javadoc'])+newline
+				}
+
+				// replace method in-file
+				text.replace(match, newline)
+			}
 		}
 
 		// search for fields to javadoc
 		text.findAll(FIELD) { match, indent, name ->
-			// rename
-			newline = match.replaceAll(name, fields[name]['name'])
 
-			// get javadoc
-			javadoc = buildJavadoc(indent, fields[name]['javadoc'])
+			if (fields[name])
+			{
+				// rename
+				newline = match.replaceAll(name, fields[name]['name'])
 
-			// replace method in-file
-			text.replace(match, javadoc+newline)
+				// get javadoc
+				if (fields[name]['javadoc'])
+				{
+					newline = buildJavadoc(indent, fields[name]['javadoc'])+newline
+				}
+
+				// replace method in-file
+				text.replace(match, newline)
+			}
 		}
 
 		// FAR all parameters
 		def match = text =~ PARAM
 		while(match.find())
 		{
-				match.replaceAll(params[match.group()])
+			text = text.replace(match.group(), params[match.group()])
 		}
 
 		// FAR all methods
@@ -80,7 +94,7 @@ class SourceRemapper
 		while(match.find())
 		{
 			if (methods[match.group()])
-				match.replaceAll(methods[match.group()]['name'])
+				text = text.replace(match.group(), methods[match.group()]['name'])
 		}
 
 		// FAR all fields
@@ -88,9 +102,10 @@ class SourceRemapper
 		while(match.find())
 		{
 			if (fields[match.group()])
-				match.replaceAll(fields[match.group()]['name'])
+				text = text.replace(match.group(), fields[match.group()]['name'])
 		}
 
+		// write file
 		file.write(text)
 	}
 
