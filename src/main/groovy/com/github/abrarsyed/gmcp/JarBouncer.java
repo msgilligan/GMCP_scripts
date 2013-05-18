@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 
-import net.md_5.specialsource.SpecialSource;
+import lombok.SneakyThrows;
+import net.md_5.specialsource.Jar;
+import net.md_5.specialsource.JarMapping;
+import net.md_5.specialsource.JarRemapper;
 import de.fernflower.main.decompiler.ConsoleDecompiler;
 
 public class JarBouncer
@@ -33,19 +36,6 @@ public class JarBouncer
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
-		}
-	}
-
-	public static void specialSource(File inJar, File outJar, File srg)
-	{
-		try
-		{
-			SpecialSource.main(new String[] { "-i=" + inJar.getPath(), "-o=" + outJar.getPath(), "-m=" + srg.getPath() });
-		}
-		catch (Exception e)
-		{
-			System.err.println("SpecialSource remapping has failed!");
 			e.printStackTrace();
 		}
 	}

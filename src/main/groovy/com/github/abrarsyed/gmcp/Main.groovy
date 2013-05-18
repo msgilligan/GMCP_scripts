@@ -1,5 +1,9 @@
 package com.github.abrarsyed.gmcp
 
+import net.md_5.specialsource.Jar;
+import net.md_5.specialsource.JarMapping;
+import net.md_5.specialsource.JarRemapper;
+
 import com.github.abrarsyed.gmcp.Util.OperatingSystem
 import com.google.common.io.Files
 
@@ -74,7 +78,18 @@ class Main
 
 	def static deobfuscate()
 	{
-		JarBouncer.specialSource(JAR, SS_JAR, new File(resources, "srgs/client.srg"))
+		// load mapping
+		JarMapping mapping = new JarMapping();
+		mapping.loadMappings(new File(resources, "srgs/client.srg"));
+
+		// load jar
+		Jar input = Jar.init(JAR);
+
+		// make remapper
+		JarRemapper remapper = new JarRemapper(mapping);
+
+		// remap jar
+		remapper.remapJar(input, SS_JAR);
 	}
 
 	def static inject()
