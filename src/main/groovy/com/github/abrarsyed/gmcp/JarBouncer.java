@@ -4,10 +4,6 @@ import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 
-import lombok.SneakyThrows;
-import net.md_5.specialsource.Jar;
-import net.md_5.specialsource.JarMapping;
-import net.md_5.specialsource.JarRemapper;
 import de.fernflower.main.decompiler.ConsoleDecompiler;
 
 public class JarBouncer

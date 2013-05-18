@@ -37,7 +37,7 @@ class Main
 
 		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
 
-		deobfuscate()
+		deobfuscate(JAR, SS_JAR)
 
 		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
 
@@ -76,20 +76,20 @@ class Main
 		JarBouncer.fernFlower(classes.getPath(), sources.getPath())
 	}
 
-	def static deobfuscate()
+	def static deobfuscate(File inJar, File outJar)
 	{
 		// load mapping
 		JarMapping mapping = new JarMapping();
 		mapping.loadMappings(new File(resources, "srgs/client.srg"));
 
 		// load jar
-		Jar input = Jar.init(JAR);
+		Jar input = Jar.init(inJar);
 
 		// make remapper
 		JarRemapper remapper = new JarRemapper(mapping);
 
 		// remap jar
-		remapper.remapJar(input, SS_JAR);
+		remapper.remapJar(input, outJar);
 	}
 
 	def static inject()
