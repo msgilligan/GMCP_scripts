@@ -3,6 +3,7 @@ package com.github.abrarsyed.gmcp;
 import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import cpw.mods.fml.common.asm.transformers.MCPMerger;
 
 import de.fernflower.main.decompiler.ConsoleDecompiler;
 
@@ -57,5 +58,14 @@ public class JarBouncer
 			System.err.println("MCInjector has failed!");
 			e.printStackTrace();
 		}
+	}
+
+	public static void MCPMerger(File client, File server, File config)
+	{
+		String[] args = new String[3];
+		args[0] = config.getPath();
+		args[1] = client.getPath();
+		args[2] = server.getPath();
+		MCPMerger.main(args);
 	}
 }

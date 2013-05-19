@@ -7,6 +7,8 @@ import net.md_5.specialsource.JarRemapper;
 import com.github.abrarsyed.gmcp.Util.OperatingSystem
 import com.google.common.io.Files
 
+import cpw.mods.fml.common.asm.transformers.MCPMerger;
+
 import difflib.DiffUtils
 
 class Main
@@ -21,6 +23,8 @@ class Main
 	public static final File SS_JAR = new File(tmp, "Minecraft_SS.jar")
 	public static final File EXC_JAR = new File(tmp, "Minecraft_EXC.jar")
 
+	public static final File CLIENT_JAR = new File(tmp, "jars/Minecraft_Client.jar")
+	public static final File SERVER_JAR = new File(tmp, "jars/Minecraft_Server.jar")
 	public static final File JAR = new File(tmp, "jars/Minecraft.jar")
 
 	public static OperatingSystem os
@@ -34,6 +38,10 @@ class Main
 		resources.mkdirs()
 
 		downloadStuff()
+		
+		println "MERGING JARS !!!!!!!!!!!!"
+		
+		mergeJars(CLIENT_JAR, SERVER_JAR)
 
 		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
 
@@ -68,6 +76,11 @@ class Main
 		renameSources(sources)
 
 		println "COMPLETE!"
+	}
+	
+	def static mergeJars(File client, File server)
+	{
+		//JarBouncer.MCPMerger(client, server, new File());
 	}
 
 	def static decompile()
@@ -198,7 +211,8 @@ class Main
 
 		def version = parser.getProperty("default", "current_ver")
 		println "downloading Minecraft"
-		Util.download(parser.getProperty(version, "client_url"), JAR)
+		Util.download(parser.getProperty(version, "client_url"), CLIENT_JAR)
+		Util.download(parser.getProperty(version, "server_url"), SERVER_JAR)
 
 		def dls = parser.getProperty("default", "libraries").split(/\s/)
 		def url = parser.getProperty("default", "base_url")
