@@ -24,7 +24,7 @@ public class JarBouncer
 		try
 		{
 			PrintStream stream = System.out;
-			System.setOut(new PrintStream(new File(Main.logs, "FF.log")));
+			System.setOut(new PrintStream(new File(Constants.DIR_LOGS, "FF.log")));
 
 			ConsoleDecompiler.main(args);
 			// -din=0 -rbr=0 -dgs=1 -asc=1 -log=WARN {indir} {outdir}
@@ -44,7 +44,7 @@ public class JarBouncer
 				input.getPath(),
 				output.getPath(),
 				config.getPath(),
-				new File(Main.logs, "MCInjector.log").getPath()
+				new File(Constants.DIR_LOGS, "MCInjector.log").getPath()
 		};
 		// {input} {output} {conf} {log}
 		try

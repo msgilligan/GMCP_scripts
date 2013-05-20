@@ -3,6 +3,8 @@ package com.github.abrarsyed.gmcp
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
 
+import com.github.abrarsyed.gmcp.Constants.OperatingSystem
+
 class Util
 {
 
@@ -92,10 +94,5 @@ class Util
 		}
 
 		zipFile.close()
-	}
-
-	static enum OperatingSystem
-	{
-		WINDOWS, MAC, LINUX
 	}
 }

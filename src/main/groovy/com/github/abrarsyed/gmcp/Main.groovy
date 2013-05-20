@@ -1,51 +1,39 @@
 package com.github.abrarsyed.gmcp
 
-import net.md_5.specialsource.Jar;
-import net.md_5.specialsource.JarMapping;
-import net.md_5.specialsource.JarRemapper;
+import net.md_5.specialsource.Jar
+import net.md_5.specialsource.JarMapping
+import net.md_5.specialsource.JarRemapper
+import org.gradle.internal.os.OperatingSystem
 
-import com.github.abrarsyed.gmcp.Util.OperatingSystem
 import com.google.common.io.Files
-
-import cpw.mods.fml.common.asm.transformers.MCPMerger;
 
 import difflib.DiffUtils
 
 class Main
 {
-	public static final File tmp = new File("tmp")
-	public static final File resources = new File("resources")
-	public static final File logs = new File(tmp, "logs")
-
-	public static final File extracted = new File(tmp, "extracted")
-	public static final File classes = new File(tmp, "classes")
-	public static final File sources = new File(tmp, "sources")
-	public static final File SS_JAR = new File(tmp, "Minecraft_SS.jar")
-	public static final File EXC_JAR = new File(tmp, "Minecraft_EXC.jar")
-
-	public static final File CLIENT_JAR = new File(tmp, "jars/Minecraft_Client.jar")
-	public static final File SERVER_JAR = new File(tmp, "jars/Minecraft_Server.jar")
-	public static final File JAR = new File(tmp, "jars/Minecraft.jar")
-
-	public static OperatingSystem os
+	public static OperatingSystem os = OperatingSystem.WINDOWS
+	
+	// to be made configureable by gradle
+	public static String MC_VERSION = "1.5.1";
+	public static String FORGE_VERSION = "7.7.2.682";  // maven style ???
 
 	public static void main(args)
 	{
 		os = Util.getOS()
 
-		logs.mkdirs()
-		tmp.mkdirs()
-		resources.mkdirs()
+		Constants.DIR_LOGS.mkdirs()
+		Constants.DIR_TEMP.mkdirs()
+		Constants.DIR_RESOURCES.mkdirs()
 
 		downloadStuff()
-		
+
 		println "MERGING JARS !!!!!!!!!!!!"
-		
-		mergeJars(CLIENT_JAR, SERVER_JAR)
+
+		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
 
 		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
 
-		deobfuscate(JAR, SS_JAR)
+		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
 
 		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
 
@@ -53,11 +41,11 @@ class Main
 
 		println "UNZIPPING !!!!!!!!!!!!"
 
-		Util.unzip(EXC_JAR, extracted, false)
+		Util.unzip(Constants.JAR_EXCEPTOR, Constants.DIR_EXTRACTED, false)
 
 		println "COPYING CLASSES!!!!!!!"
 
-		copyClasses(extracted, classes)
+		copyClasses(Constants.DIR_EXTRACTED, Constants.DIR_CLASSES)
 
 		println "DECOMPILING !!!!!!!!!!!!"
 
@@ -65,7 +53,7 @@ class Main
 
 		println "APPLY FF FIXES!!!!!!!"
 
-		FFPatcher.processDir(sources)
+		FFPatcher.processDir(Constants.DIR_SOURCES)
 
 		println "APPLYING MCP PATCHES!!!!!!!"
 
@@ -73,11 +61,11 @@ class Main
 
 		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
 
-		renameSources(sources)
+		renameSources(Constants.DIR_SOURCES)
 
 		println "COMPLETE!"
 	}
-	
+
 	def static mergeJars(File client, File server)
 	{
 		//JarBouncer.MCPMerger(client, server, new File());
@@ -85,29 +73,29 @@ class Main
 
 	def static decompile()
 	{
-		sources.mkdirs()
-		JarBouncer.fernFlower(classes.getPath(), sources.getPath())
+		Constants.DIR_SOURCES.mkdirs()
+		JarBouncer.fernFlower(Constants.DIR_CLASSES.getPath(), Constants.DIR_SOURCES.getPath())
 	}
 
 	def static deobfuscate(File inJar, File outJar)
 	{
 		// load mapping
-		JarMapping mapping = new JarMapping();
-		mapping.loadMappings(new File(resources, "srgs/client.srg"));
+		JarMapping mapping = new JarMapping()
+		mapping.loadMappings(new File(Constants.DIR_RESOURCES, "srgs/client.srg"))
 
 		// load jar
-		Jar input = Jar.init(inJar);
+		Jar input = Jar.init(inJar)
 
 		// make remapper
-		JarRemapper remapper = new JarRemapper(mapping);
+		JarRemapper remapper = new JarRemapper(mapping)
 
 		// remap jar
-		remapper.remapJar(input, outJar);
+		remapper.remapJar(input, outJar)
 	}
 
 	def static inject()
 	{
-		JarBouncer.injector(SS_JAR, EXC_JAR, new File(resources, "joined.exc"))
+		JarBouncer.injector(Constants.JAR_DEOBF, Constants.JAR_EXCEPTOR, new File(Constants.DIR_RESOURCES, "joined.exc"))
 	}
 
 	def static copyClasses(File inDir, File outDir)
@@ -156,7 +144,7 @@ class Main
 	{
 		// USELESS!!!!
 		// have to generate diffs... maybe...
-		def rawPatch = Arrays.asList(new File(resources, "patches/client.patch").text.split(System.lineSeparator))
+		def rawPatch = Arrays.asList(new File(Constants.DIR_RESOURCES, "patches/client.patch").text.split(System.lineSeparator))
 
 		def patchMap = [:]
 		def patternDiff = /diff.*?minecraft\\(.+?) .*?/
@@ -191,7 +179,7 @@ class Main
 		patchMap.each
 		{
 			println "writing for "+it.getKey()
-			file = new File(sources, it.getKey())
+			file = new File(Constants.DIR_SOURCES, it.getKey())
 			currentLines = Arrays.asList(file.text.split(System.lineSeparator))
 			newLines = DiffUtils.patch(currentLines, it.getValue())
 			text = newLines.join(System.lineSeparator)
@@ -203,16 +191,16 @@ class Main
 
 	def static downloadStuff()
 	{
-		def root = new File(tmp, "jars")
+		def root = new File(Constants.DIR_TEMP, "jars")
 		if (!root.exists() || !root.isDirectory())
 			root.mkdirs()
 
-		ConfigParser parser = new ConfigParser(resources.path+"/mc_versions.cfg")
+		ConfigParser parser = new ConfigParser(Constants.DIR_RESOURCES.path+"/mc_versions.cfg")
 
 		def version = parser.getProperty("default", "current_ver")
 		println "downloading Minecraft"
-		Util.download(parser.getProperty(version, "client_url"), CLIENT_JAR)
-		Util.download(parser.getProperty(version, "server_url"), SERVER_JAR)
+		Util.download(parser.getProperty(version, "client_url"), Constants.JAR_CLIENT)
+		Util.download(parser.getProperty(version, "server_url"), Constants.JAR_SERVER)
 
 		def dls = parser.getProperty("default", "libraries").split(/\s/)
 		def url = parser.getProperty("default", "base_url")
@@ -224,7 +212,7 @@ class Main
 
 		println "downlaoding natives"
 		dls = parser.getProperty("default", "natives").split(/\s/)[os.ordinal()]
-		File nDL = new File(tmp, dls)
+		File nDL = new File(Constants.DIR_TEMP, dls)
 		Util.download(url+dls, nDL)
 
 		Util.unzip(nDL, new File(root, "natives"), true)
@@ -233,9 +221,9 @@ class Main
 
 	def static renameSources(File dir)
 	{
-		def methods = new File(resources, "csvs/methods.csv")
-		def fields = new File(resources, "csvs/fields.csv")
-		def params = new File(resources, "csvs/params.csv")
+		def methods = new File(Constants.DIR_RESOURCES, "csvs/methods.csv")
+		def fields = new File(Constants.DIR_RESOURCES, "csvs/fields.csv")
+		def params = new File(Constants.DIR_RESOURCES, "csvs/params.csv")
 
 		SourceRemapper remapper = new SourceRemapper(methods, fields, params)
 
