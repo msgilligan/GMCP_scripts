@@ -191,32 +191,33 @@ class Main
 
 	def static downloadStuff()
 	{
-		def root = new File(Constants.DIR_TEMP, "jars")
+		def root = new File(Constants.DIR_MC_JARS)
 		if (!root.exists() || !root.isDirectory())
 			root.mkdirs()
+			
+		println "Downloading Minecraft"
+		def mcver = MC_VERSION.replace('.', '_')
+		Util.download(String.format(Constants.URL_MC_JAR, mcver), Constants.JAR_CLIENT)
+		Util.download(String.format(Constants.URL_MCSERVER_JAR, mcver), Constants.JAR_SERVER)
 
-		ConfigParser parser = new ConfigParser(Constants.DIR_RESOURCES.path+"/mc_versions.cfg")
-
-		def version = parser.getProperty("default", "current_ver")
-		println "downloading Minecraft"
-		Util.download(parser.getProperty(version, "client_url"), Constants.JAR_CLIENT)
-		Util.download(parser.getProperty(version, "server_url"), Constants.JAR_SERVER)
-
-		def dls = parser.getProperty("default", "libraries").split(/\s/)
-		def url = parser.getProperty("default", "base_url")
-		println "downloading libraries"
-		dls.each
-		{
-			Util.download(url+it, new File(root, it))
+		println "Downloading libraries"
+		Constants.LIBRARIES.each {
+			Util.download(Constants.URL_LIB_ROOT + it, new File(root, it))
 		}
 
-		println "downlaoding natives"
-		dls = parser.getProperty("default", "natives").split(/\s/)[os.ordinal()]
-		File nDL = new File(Constants.DIR_TEMP, dls)
-		Util.download(url+dls, nDL)
+		println "Downloading natives"
+		def natives = Constants.NATIVES[os.toString()]
+		def nativesJar = new File(Constants.DIR_TEMP, "natives.jar")
+		Util.download(natives, nativesJar)
 
-		Util.unzip(nDL, new File(root, "natives"), true)
-		nDL.delete()
+		Util.unzip(natives, new File(root, "natives"), true)
+		nativesJar.delete()
+		
+		println "Downloading Forge"
+		def forge = new File(Constants.DIR_TEMP, "forge.zip");
+		Util.download(String.format(Constants.URL_FORGE, MC_VERSION, FORGE_VERSION), forge)
+		Util.unzip(forge, Constants.DIR_TEMP, true)
+		forge.delete()
 	}
 
 	def static renameSources(File dir)
