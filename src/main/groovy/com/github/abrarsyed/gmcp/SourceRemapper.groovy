@@ -8,14 +8,16 @@ class SourceRemapper
 	def Map methods
 	def Map fields
 	def Map params
+	def Map packages
 
 	final String METHOD_SMALL = /func_[0-9]+_[a-zA-Z_]+/
 	final String FIELD_SMALL = /field_[0-9]+_[a-zA-Z_]+/
 	final String PARAM = /p_[\w]+_\d+_/
-	final String METHOD = /(?m)^((?: |\t)*)(?:\w+ )*(/+METHOD_SMALL+/)\(/
-	final String FIELD = /(?m)^((?: |\t)*)(?:\w+ )*(/+FIELD_SMALL+/) *(?:=|;)/
+	final String METHOD = /(?m)^((?: |\t)*)(?:\w+ )*(/+METHOD_SMALL+/)\(/  // captures indent and name
+	final String FIELD = /(?m)^((?: |\t)*)(?:\w+ )*(/+FIELD_SMALL+/) *(?:=|;)/ // capures indent and name
+	final String PACKAGE = /(?m)^import[ \t]+([\w.]+);/ // captures name
 
-	SourceRemapper(File methodCSV, File fieldCSV, File paramCSV)
+	SourceRemapper(File methodCSV, File fieldCSV, File paramCSV, File packageCSV)
 	{
 		def reader = getReader(methodCSV)
 		methods = [:]
@@ -37,10 +39,18 @@ class SourceRemapper
 		{
 			params[it[0]] = it[1]
 		}
+		
+		reader = getReader(packageCSV)
+		packages = [:]
+		reader.readAll().each
+		{
+			packages[it[0]] = it[1]
+		}
 	}
 
 	def remapFile(File file)
 	{
+		def className = file.name.replace(/[.]\w+/, '');
 		def text = file.text;file
 		def newline
 
@@ -114,6 +124,14 @@ class SourceRemapper
 		def out = indent+"/**"+System.lineSeparator
 		out += indent+" * "+javadoc+System.lineSeparator
 		out += indent+" */"+System.lineSeparator
+	}
+	
+	/**
+	 * Converts a package path to a proper package declaration
+	 */
+	private String convertPackagePath(String newPackage)
+	{
+		return newPackage.replace('[\\]','.').replace('[/]', '.');
 	}
 
 	private CSVReader getReader(File file)

@@ -196,7 +196,7 @@ class Main
 			root.mkdirs()
 			
 		println "Downloading Minecraft"
-		def mcver = MC_VERSION.replace('.', '_')
+		def mcver = MC_VERSION.replace('[.]', '_')
 		Util.download(String.format(Constants.URL_MC_JAR, mcver), Constants.JAR_CLIENT)
 		Util.download(String.format(Constants.URL_MCSERVER_JAR, mcver), Constants.JAR_SERVER)
 
@@ -225,8 +225,9 @@ class Main
 		def methods = new File(Constants.DIR_RESOURCES, "csvs/methods.csv")
 		def fields = new File(Constants.DIR_RESOURCES, "csvs/fields.csv")
 		def params = new File(Constants.DIR_RESOURCES, "csvs/params.csv")
+		def packages = new File(Constants.DIR_RESOURCES, "csvs/packages.csv")
 
-		SourceRemapper remapper = new SourceRemapper(methods, fields, params)
+		SourceRemapper remapper = new SourceRemapper(methods, fields, params, packages)
 
 		dir.eachFileRecurse {
 			if (it.isFile())
