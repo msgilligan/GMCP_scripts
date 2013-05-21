@@ -8,16 +8,14 @@ class SourceRemapper
 	def Map methods
 	def Map fields
 	def Map params
-	def Map packages
 
 	final String METHOD_SMALL = /func_[0-9]+_[a-zA-Z_]+/
 	final String FIELD_SMALL = /field_[0-9]+_[a-zA-Z_]+/
 	final String PARAM = /p_[\w]+_\d+_/
 	final String METHOD = /(?m)^((?: |\t)*)(?:\w+ )*(/+METHOD_SMALL+/)\(/  // captures indent and name
 	final String FIELD = /(?m)^((?: |\t)*)(?:\w+ )*(/+FIELD_SMALL+/) *(?:=|;)/ // capures indent and name
-	final String PACKAGE = /(?m)^import[ \t]+([\w.]+);/ // captures name
 
-	SourceRemapper(File methodCSV, File fieldCSV, File paramCSV, File packageCSV)
+	SourceRemapper(File methodCSV, File fieldCSV, File paramCSV)
 	{
 		def reader = getReader(methodCSV)
 		methods = [:]
@@ -39,19 +37,11 @@ class SourceRemapper
 		{
 			params[it[0]] = it[1]
 		}
-		
-		reader = getReader(packageCSV)
-		packages = [:]
-		reader.readAll().each
-		{
-			packages[it[0]] = it[1]
-		}
 	}
 
 	def remapFile(File file)
 	{
-		def className = file.name.replace(/[.]\w+/, '');
-		def text = file.text;file
+		def text = file.text
 		def newline
 
 		// search methods to javadoc
@@ -114,7 +104,7 @@ class SourceRemapper
 			if (fields[match.group()])
 				text = text.replace(match.group(), fields[match.group()]['name'])
 		}
-
+		
 		// write file
 		file.write(text)
 	}
