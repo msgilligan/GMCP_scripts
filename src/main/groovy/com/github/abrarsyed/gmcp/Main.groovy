@@ -1,10 +1,12 @@
 package com.github.abrarsyed.gmcp
 
+import net.md_5.specialsource.AccessMap
 import net.md_5.specialsource.Jar
 import net.md_5.specialsource.JarMapping
 import net.md_5.specialsource.JarRemapper
-import org.gradle.internal.os.OperatingSystem
+import net.md_5.specialsource.RemapperPreprocessor
 
+import com.github.abrarsyed.gmcp.Constants.OperatingSystem
 import com.google.common.io.Files
 
 import difflib.DiffUtils
@@ -15,7 +17,7 @@ class Main
 	
 	// to be made configureable by gradle
 	public static String MC_VERSION = "1.5.1";
-	public static String FORGE_VERSION = "7.7.2.682";  // maven style ???
+	public static String FORGE_VERSION = "7.7.2.682";
 
 	public static void main(args)
 	{
@@ -24,6 +26,8 @@ class Main
 		Constants.DIR_LOGS.mkdirs()
 		Constants.DIR_TEMP.mkdirs()
 		Constants.DIR_RESOURCES.mkdirs()
+		
+		println "DOWNLOADING STUFF !!!!!!!!!!!!"
 
 		downloadStuff()
 
@@ -68,7 +72,7 @@ class Main
 
 	def static mergeJars(File client, File server)
 	{
-		//JarBouncer.MCPMerger(client, server, new File());
+		JarBouncer.MCPMerger(client, server, new File(Constants.DIR_FML, "mcp_merge.cfg"));
 	}
 
 	def static decompile()
@@ -81,13 +85,18 @@ class Main
 	{
 		// load mapping
 		JarMapping mapping = new JarMapping()
-		mapping.loadMappings(new File(Constants.DIR_RESOURCES, "srgs/client.srg"))
-
-		// load jar
-		Jar input = Jar.init(inJar)
+		mapping.loadMappings(new File(Constants.DIR_FML_PATCHES, "joined.srg"))
+		
+		// load in AT
+		def accessMap = new AccessMap()
+		accessMap.loadAccessTransformer(new File(Constants.DIR_FML, "common/forge_at.cfg"))
+		def processor = new  RemapperPreprocessor(null, mapping, accessMap)
 
 		// make remapper
-		JarRemapper remapper = new JarRemapper(mapping)
+		JarRemapper remapper = new JarRemapper(processor, mapping)
+		
+		// load jar
+		Jar input = Jar.init(inJar)
 
 		// remap jar
 		remapper.remapJar(input, outJar)
@@ -191,12 +200,12 @@ class Main
 
 	def static downloadStuff()
 	{
-		def root = new File(Constants.DIR_MC_JARS)
+		def root = Constants.DIR_MC_JARS
 		if (!root.exists() || !root.isDirectory())
 			root.mkdirs()
 			
 		println "Downloading Minecraft"
-		def mcver = MC_VERSION.replace('[.]', '_')
+		def mcver = MC_VERSION.replaceAll(/\./, /_/)
 		Util.download(String.format(Constants.URL_MC_JAR, mcver), Constants.JAR_CLIENT)
 		Util.download(String.format(Constants.URL_MCSERVER_JAR, mcver), Constants.JAR_SERVER)
 
@@ -206,11 +215,10 @@ class Main
 		}
 
 		println "Downloading natives"
-		def natives = Constants.NATIVES[os.toString()]
 		def nativesJar = new File(Constants.DIR_TEMP, "natives.jar")
-		Util.download(natives, nativesJar)
+		Util.download(Constants.URL_LIB_ROOT+Constants.NATIVES[os.toString()], nativesJar)
 
-		Util.unzip(natives, new File(root, "natives"), true)
+		Util.unzip(nativesJar, new File(root, "natives"), true)
 		nativesJar.delete()
 		
 		println "Downloading Forge"
@@ -227,7 +235,7 @@ class Main
 		def params = new File(Constants.DIR_RESOURCES, "csvs/params.csv")
 		def packages = new File(Constants.DIR_RESOURCES, "csvs/packages.csv")
 
-		SourceRemapper remapper = new SourceRemapper(methods, fields, params, packages)
+		SourceRemapper remapper = new SourceRemapper(methods, fields, params)
 
 		dir.eachFileRecurse {
 			if (it.isFile())
