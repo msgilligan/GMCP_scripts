@@ -20,8 +20,8 @@ class Main
 	public static OperatingSystem os = OperatingSystem.WINDOWS
 
 	// to be made configureable by gradle
-	public static String MC_VERSION = "1.5.1"
-	public static String FORGE_VERSION = "7.7.2.682"
+	public static String MC_VERSION = "1.5.2"
+	public static String FORGE_VERSION = "7.8.0.710"
 
 	public static void main(args)
 	{
