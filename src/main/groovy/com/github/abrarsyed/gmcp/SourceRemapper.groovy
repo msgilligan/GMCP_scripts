@@ -15,23 +15,23 @@ class SourceRemapper
 	final String METHOD = /(?m)^((?: |\t)*)(?:\w+ )*(/+METHOD_SMALL+/)\(/  // captures indent and name
 	final String FIELD = /(?m)^((?: |\t)*)(?:\w+ )*(/+FIELD_SMALL+/) *(?:=|;)/ // capures indent and name
 
-	SourceRemapper(File methodCSV, File fieldCSV, File paramCSV)
+	SourceRemapper(files)
 	{
-		def reader = getReader(methodCSV)
+		def reader = getReader(files["methods"])
 		methods = [:]
 		reader.readAll().each
 		{
 			methods[it[0]] = [name:it[1], javadoc:it[3]]
 		}
 
-		reader = getReader(fieldCSV)
+		reader = getReader(files["fields"])
 		fields = [:]
 		reader.readAll().each
 		{
 			fields[it[0]] = [name:it[1], javadoc:it[3]]
 		}
 
-		reader = getReader(paramCSV)
+		reader = getReader(files["params"])
 		params = [:]
 		reader.readAll().each
 		{

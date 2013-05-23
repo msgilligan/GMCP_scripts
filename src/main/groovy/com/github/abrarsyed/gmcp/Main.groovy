@@ -26,10 +26,10 @@ class Main
 	public static void main(args)
 	{
 		os = Util.getOS()
-
-		Constants.DIR_LOGS.mkdirs()
-		Constants.DIR_TEMP.mkdirs()
-		Constants.DIR_RESOURCES.mkdirs()
+		
+		println "cleaning up past builds...."
+		Util.createOrCleanDir(Constants.DIR_TEMP)
+		Util.createOrCleanDir(Constants.DIR_LOGS)
 
 		println "DOWNLOADING STUFF !!!!!!!!!!!!"
 
@@ -127,7 +127,7 @@ class Main
 
 	def static inject()
 	{
-		JarBouncer.injector(Constants.JAR_DEOBF, Constants.JAR_EXCEPTOR, new File(Constants.DIR_RESOURCES, "joined.exc"))
+		JarBouncer.injector(Constants.JAR_DEOBF, Constants.JAR_EXCEPTOR, new File(Constants.DIR_MAPPINGS, "joined.exc"))
 	}
 
 	def static copyClasses(File inDir, File outDir)
@@ -252,12 +252,13 @@ class Main
 
 	def static renameSources(File dir)
 	{
-		def methods = new File(Constants.DIR_RESOURCES, "csvs/methods.csv")
-		def fields = new File(Constants.DIR_RESOURCES, "csvs/fields.csv")
-		def params = new File(Constants.DIR_RESOURCES, "csvs/params.csv")
-		def packages = new File(Constants.DIR_RESOURCES, "csvs/packages.csv")
+		def files = [:]
+		
+		Constants.CSVS.entrySet().every {
+			files[it.key] = new File(Constants.DIR_MAPPINGS, it.value)
+		}
 
-		SourceRemapper remapper = new SourceRemapper(methods, fields, params)
+		SourceRemapper remapper = new SourceRemapper(files)
 
 		dir.eachFileRecurse {
 			if (it.isFile())

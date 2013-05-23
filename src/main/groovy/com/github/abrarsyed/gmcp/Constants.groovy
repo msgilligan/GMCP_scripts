@@ -4,7 +4,6 @@ public final class Constants
 {
 	// root dirs
 	public static final File	DIR_TEMP			= new File("tmp")
-	public static final File	DIR_RESOURCES		= new File("resources")
 
 	// temp dirs
 	public static final File	DIR_LOGS			= new File(DIR_TEMP, "logs")
@@ -49,9 +48,10 @@ public final class Constants
 	
 	// CSVs
 	public static final CSVS = [
-		WINDOWS:"windows_natives.jar",
-		MAC: "macosx_natives.jar",
-		LINUX: "linux_natives.jar"
+		methods:"methods.csv",
+		fields: "fields.csv",
+		params: "params.csv",
+		packages: "packages.csv"
 	]
 
 	static enum OperatingSystem

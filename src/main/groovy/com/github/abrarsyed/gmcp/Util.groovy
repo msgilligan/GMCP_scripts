@@ -96,4 +96,21 @@ class Util
 
 		zipFile.close()
 	}
+
+	public static createOrCleanDir(File file)
+	{
+		
+		if (file.exists() && file.isDirectory())
+		{
+			file.eachFile
+			{
+				if (it.isDirectory())
+					it.deleteDir()
+				else
+					it.delete()
+			}
+		}
+		else
+			file.mkdirs()
+	}
 }
