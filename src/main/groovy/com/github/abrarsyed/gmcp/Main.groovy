@@ -1,5 +1,9 @@
 package com.github.abrarsyed.gmcp
 
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
+
 import net.md_5.specialsource.AccessMap
 import net.md_5.specialsource.Jar
 import net.md_5.specialsource.JarMapping
@@ -14,10 +18,10 @@ import difflib.DiffUtils
 class Main
 {
 	public static OperatingSystem os = OperatingSystem.WINDOWS
-	
+
 	// to be made configureable by gradle
-	public static String MC_VERSION = "1.5.1";
-	public static String FORGE_VERSION = "7.7.2.682";
+	public static String MC_VERSION = "1.5.1"
+	public static String FORGE_VERSION = "7.7.2.682"
 
 	public static void main(args)
 	{
@@ -26,7 +30,7 @@ class Main
 		Constants.DIR_LOGS.mkdirs()
 		Constants.DIR_TEMP.mkdirs()
 		Constants.DIR_RESOURCES.mkdirs()
-		
+
 		println "DOWNLOADING STUFF !!!!!!!!!!!!"
 
 		downloadStuff()
@@ -72,7 +76,25 @@ class Main
 
 	def static mergeJars(File client, File server)
 	{
-		JarBouncer.MCPMerger(client, server, new File(Constants.DIR_FML, "mcp_merge.cfg"));
+		JarBouncer.MCPMerger(client, server, new File(Constants.DIR_FML, "mcp_merge.cfg"))
+
+		// copy and strip META-INF
+		def output = new ZipOutputStream(Constants.JAR_MERGED.newDataOutputStream());
+		def ZipFile input = new ZipFile(Constants.JAR_CLIENT)
+		
+		input.entries().each{ ZipEntry it ->
+			if (it.name.contains("META-INF"))
+				return
+			else if (it.size > 0)
+			{
+				output.putNextEntry(it)
+				output.write(input.getInputStream(it).bytes)
+				output.closeEntry();
+			}
+		}
+		
+		input.close()
+		output.close()
 	}
 
 	def static decompile()
@@ -85,16 +107,17 @@ class Main
 	{
 		// load mapping
 		JarMapping mapping = new JarMapping()
-		mapping.loadMappings(new File(Constants.DIR_FML_PATCHES, "joined.srg"))
-		
+		mapping.loadMappings(new File(Constants.DIR_MAPPINGS, "joined.srg"))
+
 		// load in AT
 		def accessMap = new AccessMap()
-		accessMap.loadAccessTransformer(new File(Constants.DIR_FML, "common/forge_at.cfg"))
+		accessMap.loadAccessTransformer(new File(Constants.DIR_FML, "common/fml_at.cfg"))
+		accessMap.loadAccessTransformer(new File(Constants.DIR_FORGE, "common/forge_at.cfg"))
 		def processor = new  RemapperPreprocessor(null, mapping, accessMap)
 
 		// make remapper
 		JarRemapper remapper = new JarRemapper(processor, mapping)
-		
+
 		// load jar
 		Jar input = Jar.init(inJar)
 
@@ -151,9 +174,8 @@ class Main
 
 	def static patch()
 	{
-		// USELESS!!!!
 		// have to generate diffs... maybe...
-		def rawPatch = Arrays.asList(new File(Constants.DIR_RESOURCES, "patches/client.patch").text.split(System.lineSeparator))
+		def rawPatch = Arrays.asList(new File(Constants.DIR_FML_PATCHES, "minecraft_ff.patch").text.split(System.lineSeparator))
 
 		def patchMap = [:]
 		def patternDiff = /diff.*?minecraft\\(.+?) .*?/
@@ -203,7 +225,7 @@ class Main
 		def root = Constants.DIR_MC_JARS
 		if (!root.exists() || !root.isDirectory())
 			root.mkdirs()
-			
+
 		println "Downloading Minecraft"
 		def mcver = MC_VERSION.replaceAll(/\./, /_/)
 		Util.download(String.format(Constants.URL_MC_JAR, mcver), Constants.JAR_CLIENT)
@@ -220,9 +242,9 @@ class Main
 
 		Util.unzip(nativesJar, new File(root, "natives"), true)
 		nativesJar.delete()
-		
+
 		println "Downloading Forge"
-		def forge = new File(Constants.DIR_TEMP, "forge.zip");
+		def forge = new File(Constants.DIR_TEMP, "forge.zip")
 		Util.download(String.format(Constants.URL_FORGE, MC_VERSION, FORGE_VERSION), forge)
 		Util.unzip(forge, Constants.DIR_TEMP, true)
 		forge.delete()

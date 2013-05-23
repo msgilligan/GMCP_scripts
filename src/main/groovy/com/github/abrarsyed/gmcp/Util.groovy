@@ -2,6 +2,7 @@ package com.github.abrarsyed.gmcp
 
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 
 import com.github.abrarsyed.gmcp.Constants.OperatingSystem
 
@@ -72,7 +73,7 @@ class Util
 	 */
 	def static void unzip(File input, File outputDir, boolean stripMeta)
 	{
-		def zipFile = new java.util.zip.ZipFile(input)
+		def zipFile = new ZipFile(input)
 
 		outputDir.mkdirs()
 
