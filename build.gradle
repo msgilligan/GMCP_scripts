@@ -9,11 +9,7 @@ archivesBaseName = 'GMCP'
 
 jar {
     manifest {
-        attributes	[
-			'Title': 'GMCP',
-			'Version': version,
-			'Main-Class' : 'com.github.abrarsyed.gmcp.Main'
-			]
+        attributes 'Title': 'GMCP', 'Version': version, 'Main-Class' : 'com.github.abrarsyed.gmcp.Main'
     }
 }
 
