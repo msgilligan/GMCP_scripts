@@ -262,7 +262,7 @@ class Main
 
 		dir.eachFileRecurse {
 			if (it.isFile())
-				remapper.remapFile(it)
+				remapper.remapFile(dir, it)
 		}
 	}
 }

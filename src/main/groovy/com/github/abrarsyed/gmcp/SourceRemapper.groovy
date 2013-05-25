@@ -8,7 +8,10 @@ class SourceRemapper
 	def Map methods
 	def Map fields
 	def Map params
+	def Map packages
 
+	final String PACKAGE = 'package net.minecraft.src;'
+	final String IMPORT = /(?m)^import net\.minecraft\.src\.(\w+);/
 	final String METHOD_SMALL = /func_[0-9]+_[a-zA-Z_]+/
 	final String FIELD_SMALL = /field_[0-9]+_[a-zA-Z_]+/
 	final String PARAM = /p_[\w]+_\d+_/
@@ -37,12 +40,57 @@ class SourceRemapper
 		{
 			params[it[0]] = it[1]
 		}
+
+		reader = getReader(files["packages"])
+		packages = [:]
+		reader.readAll().each
+		{
+			packages[it[0]] = it[1]
+		}
 	}
 
-	def remapFile(File file)
+	private CSVReader getReader(File file)
 	{
+		return new CSVReader(new FileReader(file), CSVParser.DEFAULT_SEPARATOR, CSVParser.DEFAULT_QUOTE_CHARACTER, CSVParser.DEFAULT_ESCAPE_CHARACTER, 1, false)
+	}
+
+	private buildJavadoc(indent, javadoc)
+	{
+		def out = indent+"/**"+System.lineSeparator
+		out += indent+" * "+javadoc+System.lineSeparator
+		out += indent+" */"+System.lineSeparator
+	}
+
+	/**
+	 * Converts a package path to a proper package declaration
+	 */
+	private String convertPackagePath(String newPackage)
+	{
+		return newPackage.replace("\\",'.').replace("/", '.')
+	}
+
+	def remapFile(File root, File file)
+	{
+		def className = file.name.replace(".java", '')
 		def text = file.text
-		def newline
+		def newline, matcher
+
+		// change package declaration
+		if (packages[className])
+		{
+			// change package definition
+			newline = "package "+convertPackagePath(packages[className])+";"
+			text.replace(PACKAGE, newline)
+
+			// change imports
+			text.findAll(IMPORT) { match, imported ->
+				if (packages[imported])
+				{
+					newline = "import "+convertPackagePath(packages[imported])+"."+imported+";"
+					text = text.replace(match, newline)
+				}
+			}
+		}
 
 		// search methods to javadoc
 		text.findAll(METHOD) { match, indent, name ->
@@ -59,7 +107,7 @@ class SourceRemapper
 				}
 
 				// replace method in-file
-				text.replace(match, newline)
+				text = text.replace(match, newline)
 			}
 		}
 
@@ -78,54 +126,45 @@ class SourceRemapper
 				}
 
 				// replace method in-file
-				text.replace(match, newline)
+				text = text.replace(match, newline)
 			}
 		}
 
 		// FAR all parameters
-		def match = text =~ PARAM
-		while(match.find())
+		matcher = text =~ PARAM
+		while(matcher.find())
 		{
-			text = text.replace(match.group(), params[match.group()])
+			text = text.replace(matcher.group(), params[matcher.group()])
 		}
 
 		// FAR all methods
-		match = text =~ METHOD_SMALL
-		while(match.find())
+		matcher = text =~ METHOD_SMALL
+		while(matcher.find())
 		{
-			if (methods[match.group()])
-				text = text.replace(match.group(), methods[match.group()]['name'])
+			if (methods[matcher.group()])
+				text = text.replace(matcher.group(), methods[matcher.group()]['name'])
 		}
 
 		// FAR all fields
-		match = text =~ FIELD_SMALL
-		while(match.find())
+		matcher = text =~ FIELD_SMALL
+		while(matcher.find())
 		{
-			if (fields[match.group()])
-				text = text.replace(match.group(), fields[match.group()]['name'])
+			if (fields[matcher.group()])
+				text = text.replace(matcher.group(), fields[matcher.group()]['name'])
 		}
-		
+
+		if (packages[className])
+		{
+			// delete old file.
+			file.delete()
+
+			// replace file with new file
+			file = new File(root, packages[className])
+			file.mkdirs()
+			file = new File(file, className+".java")
+		}
+
 		// write file
 		file.write(text)
-	}
-
-	private buildJavadoc(indent, javadoc)
-	{
-		def out = indent+"/**"+System.lineSeparator
-		out += indent+" * "+javadoc+System.lineSeparator
-		out += indent+" */"+System.lineSeparator
-	}
-	
-	/**
-	 * Converts a package path to a proper package declaration
-	 */
-	private String convertPackagePath(String newPackage)
-	{
-		return newPackage.replace('[\\]','.').replace('[/]', '.');
-	}
-
-	private CSVReader getReader(File file)
-	{
-		return new CSVReader(new FileReader(file), CSVParser.DEFAULT_SEPARATOR, CSVParser.DEFAULT_QUOTE_CHARACTER, CSVParser.DEFAULT_ESCAPE_CHARACTER, 1, false)
 	}
 }
