@@ -8,9 +8,12 @@ version = '0.1-SNAPSHOT'
 archivesBaseName = 'GMCP'
 
 jar {
-    manifest {
-        attributes 'Title': 'GMCP', 'Version': version, 'Main-Class' : 'com.github.abrarsyed.gmcp.Main'
-    }
+	// add lib folder stuff
+	def libs = files { file('lib').listFiles() }
+	from { libs.collect { it.isDirectory() ? it : zipTree(it) } }
+	
+	// manifest
+    manifest { attributes 'Main-Class' : 'com.github.abrarsyed.gmcp.Main' }
 }
 
 repositories {
@@ -25,7 +28,7 @@ dependencies {
 	// compile gradleApi()
 	compile 'org.ow2.asm:asm-all:4.1'
 	compile 'com.google.guava:guava:14.0.1'
-	//compile 'net.sourceforge.argo:argo:3.3'      until gradle stops killing this....
+	compile 'net.sourceforge.argo:argo:3.4'
 	compile 'net.sf.opencsv:opencsv:2.3'
 	
 	compile 'net.md-5:SpecialSource:1.5'
