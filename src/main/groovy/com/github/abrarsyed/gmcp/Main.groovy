@@ -25,51 +25,55 @@ class Main
 
 	public static void main(args)
 	{
-		os = Util.getOS()
+//		os = Util.getOS()
+//		
+//		println "cleaning up past builds...."
+//		Util.createOrCleanDir(Constants.DIR_TEMP)
+//		Util.createOrCleanDir(Constants.DIR_LOGS)
+//
+//		println "DOWNLOADING STUFF !!!!!!!!!!!!"
+//
+//		downloadStuff()
+//
+//		println "MERGING JARS !!!!!!!!!!!!"
+//
+//		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
+//
+//		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
+//
+//		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
+//
+//		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
+//
+//		inject()
+//
+//		println "UNZIPPING !!!!!!!!!!!!"
+//
+//		Util.unzip(Constants.JAR_EXCEPTOR, Constants.DIR_EXTRACTED, false)
+//
+//		println "COPYING CLASSES!!!!!!!"
+//
+//		copyClasses(Constants.DIR_EXTRACTED, Constants.DIR_CLASSES)
+//
+//		println "DECOMPILING !!!!!!!!!!!!"
+//
+//		decompile()
+//
+//		println "APPLY FF FIXES!!!!!!!"
+//
+//		FFPatcher.processDir(Constants.DIR_SOURCES)
+//
+//		println "APPLYING MCP PATCHES!!!!!!!"
+//
+//		patch()
+//
+//		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
+//
+//		renameSources(Constants.DIR_SOURCES)
 		
-		println "cleaning up past builds...."
-		Util.createOrCleanDir(Constants.DIR_TEMP)
-		Util.createOrCleanDir(Constants.DIR_LOGS)
-
-		println "DOWNLOADING STUFF !!!!!!!!!!!!"
-
-		downloadStuff()
-
-		println "MERGING JARS !!!!!!!!!!!!"
-
-		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
-
-		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
-
-		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
-
-		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
-
-		inject()
-
-		println "UNZIPPING !!!!!!!!!!!!"
-
-		Util.unzip(Constants.JAR_EXCEPTOR, Constants.DIR_EXTRACTED, false)
-
-		println "COPYING CLASSES!!!!!!!"
-
-		copyClasses(Constants.DIR_EXTRACTED, Constants.DIR_CLASSES)
-
-		println "DECOMPILING !!!!!!!!!!!!"
-
-		decompile()
-
-		println "APPLY FF FIXES!!!!!!!"
-
-		FFPatcher.processDir(Constants.DIR_SOURCES)
-
-		println "APPLYING MCP PATCHES!!!!!!!"
-
-		patch()
-
-		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
-
-		renameSources(Constants.DIR_SOURCES)
+		println "FORMATTING SOURCES!!!!!!!!"
+		
+		formatSources(Constants.DIR_SOURCES)
 
 		println "COMPLETE!"
 	}
@@ -264,5 +268,10 @@ class Main
 			if (it.isFile())
 				remapper.remapFile(dir, it)
 		}
+	}
+	
+	def static formatSources(File dir)
+	{
+		JarBouncer.formatter(dir, new File(Constants.DIR_MAPPINGS, "astyle.cfg"))
 	}
 }
