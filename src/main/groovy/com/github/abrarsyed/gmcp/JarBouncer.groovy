@@ -4,6 +4,8 @@ import java.lang.reflect.Method
 
 import cpw.mods.fml.common.asm.transformers.MCPMerger
 import de.fernflower.main.decompiler.ConsoleDecompiler
+import com.github.abrarsyed.jastyle.ASFormatter
+import com.github.abrarsyed.jastyle.OptParser
 
 public class JarBouncer
 {
@@ -68,31 +70,20 @@ public class JarBouncer
 
 	public static void formatter(File inputDir, File astyleConf)
 	{
-		def argList = []
-
-		// parse astyle file
-
-		/*
-		 astyleConf.eachLine {line ->
-		 if (!line.startsWith("#") && !line.isEmpty())
-		 argList += "--"+line
-		 }
-		 */
-
-		argList += "--options="+astyleConf
-
-		// add recursive directory option
-		argList += "--recursive"
-
-		argList += inputDir.path+/\*.java/
-
-		println argList
-
-		String[] args = argList as String[]
-
 		try
 		{
-			com.github.abrarsyed.jastyle.Main.main(args)
+			ASFormatter formatter = new ASFormatter()
+			OptParser parser = new OptParser(formatter)
+			
+			parser.parseOptionFile(astyleConf)
+			formatter.setBreakBlocksMode(true)
+						
+			
+			inputDir.eachFileRecurse {
+				if (it.isFile() && it.name.endsWith(".java"))
+					formatter.formatFile(it)
+			}
+			
 		}
 		catch (Exception e)
 		{

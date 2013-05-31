@@ -33,6 +33,9 @@ dependencies {
 	
 	compile 'net.md-5:SpecialSource:1.5'
 	
+	// YAY, ITS ON MAVEN CENTRAL!
+	compile 'com.github.abrarsyed.jastyle:jAstyle:0.8'
+	
 	compile 'com.googlecode.java-diff-utils:diffutils:1.2'
 	
 	compile 'org.projectlombok:lombok:0.11.6'
