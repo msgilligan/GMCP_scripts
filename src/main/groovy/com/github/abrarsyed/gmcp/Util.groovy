@@ -1,5 +1,6 @@
 package com.github.abrarsyed.gmcp
 
+import java.io.File;
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -112,5 +113,10 @@ class Util
 		}
 		else
 			file.mkdirs()
+	}
+	
+	def static String getRelative(File root, File file)
+	{
+		return file.getAbsolutePath().substring(root.getAbsolutePath().length());
 	}
 }

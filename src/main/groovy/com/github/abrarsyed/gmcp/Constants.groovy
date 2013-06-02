@@ -13,9 +13,10 @@ public final class Constants
 	public static final File 	DIR_MC_JARS 		= new File(DIR_TEMP, "jars")
 	public static final File 	DIR_FORGE 			= new File(DIR_TEMP, "forge")
 	public static final File 	DIR_FML 			= new File(DIR_FORGE, "fml")
-	public static final File 	DIR_FORGE_PATCHES 	= new File(DIR_FORGE, "patches")
+	public static final File 	DIR_FORGE_PATCHES 	= new File(DIR_FORGE, "patches/minecraft")
+	public static final File 	DIR_FML_PATCHES 	= new File(DIR_FML, "patches/minecraft")
 	public static final File 	DIR_MAPPINGS 		= new File(DIR_FML, "conf")
-	public static final File 	DIR_FML_PATCHES 	= new File(DIR_MAPPINGS, "patches")
+	public static final File 	DIR_MCP_PATCHES 	= new File(DIR_MAPPINGS, "patches")
 
 	// jar files
 	public static final File	JAR_CLIENT			= new File(DIR_TEMP, "jars/Minecraft_Client.jar")

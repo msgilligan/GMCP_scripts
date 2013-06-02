@@ -75,8 +75,9 @@ public class JarBouncer
 			ASFormatter formatter = new ASFormatter()
 			OptParser parser = new OptParser(formatter)
 			
-			parser.parseOptionFile(astyleConf)
+			def errors =parser.parseOptionFile(astyleConf)
 			formatter.setBreakBlocksMode(true)
+			formatter.setDeleteEmptyLinesMode(false);
 						
 			
 			inputDir.eachFileRecurse {

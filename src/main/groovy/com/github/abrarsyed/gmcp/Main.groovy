@@ -25,56 +25,61 @@ class Main
 
 	public static void main(args)
 	{
-//		os = Util.getOS()
-//		
-//		println "cleaning up past builds...."
-//		Util.createOrCleanDir(Constants.DIR_TEMP)
-//		Util.createOrCleanDir(Constants.DIR_LOGS)
-//
-//		println "DOWNLOADING STUFF !!!!!!!!!!!!"
-//
-//		downloadStuff()
-//
-//		println "MERGING JARS !!!!!!!!!!!!"
-//
-//		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
-//
-//		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
-//
-//		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
-//
-//		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
-//
-//		inject()
-//
-//		println "UNZIPPING !!!!!!!!!!!!"
-//
-//		Util.unzip(Constants.JAR_EXCEPTOR, Constants.DIR_EXTRACTED, false)
-//
-//		println "COPYING CLASSES!!!!!!!"
-//
-//		copyClasses(Constants.DIR_EXTRACTED, Constants.DIR_CLASSES)
-//
-//		println "DECOMPILING !!!!!!!!!!!!"
-//
-//		decompile()
-//
-//		println "APPLY FF FIXES!!!!!!!"
-//
-//		FFPatcher.processDir(Constants.DIR_SOURCES)
-//
-//		println "APPLYING MCP PATCHES!!!!!!!"
-//
-//		patch()
-//
-//		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
-//
-//		renameSources(Constants.DIR_SOURCES)
+		os = Util.getOS()
+		
+		println "cleaning up past builds...."
+		Util.createOrCleanDir(Constants.DIR_TEMP)
+		Util.createOrCleanDir(Constants.DIR_LOGS)
+
+		println "DOWNLOADING STUFF !!!!!!!!!!!!"
+
+		downloadStuff()
+
+		println "MERGING JARS !!!!!!!!!!!!"
+
+		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
+
+		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
+
+		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
+
+		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
+
+		inject()
+
+		println "UNZIPPING !!!!!!!!!!!!"
+
+		Util.unzip(Constants.JAR_EXCEPTOR, Constants.DIR_EXTRACTED, false)
+
+		println "COPYING CLASSES!!!!!!!"
+
+		copyClasses(Constants.DIR_EXTRACTED, Constants.DIR_CLASSES)
+
+		println "DECOMPILING !!!!!!!!!!!!"
+
+		decompile()
+
+		println "APPLY FF FIXES!!!!!!!"
+
+		FFPatcher.processDir(Constants.DIR_SOURCES)
+
+		println "APPLYING MCP PATCHES!!!!!!!"
+
+		patchMCP()
+
+		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
+
+		renameSources(Constants.DIR_SOURCES)
 		
 		println "FORMATTING SOURCES!!!!!!!!"
 		
 		formatSources(Constants.DIR_SOURCES)
-
+		
+		println "APPLYING FORGE AND FML PATCHES!!!!!!!!"
+		
+		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
+		applyPatches(Constants.DIR_FORGE_PATCHES, Constants.DIR_SOURCES)
+		
 		println "COMPLETE!"
 	}
 
@@ -141,7 +146,7 @@ class Main
 		inDir.eachFileRecurse
 		{
 			// check ignored packages....
-			if (isIgnored(it.getPath()))
+			if (!it.path.contains("net\\minecraft"))
 			{
 				return
 			}
@@ -159,27 +164,10 @@ class Main
 		}
 	}
 
-	def static boolean isIgnored(String str)
-	{
-		switch(str)
-		{
-			case ~/.*?paulscode.*/: return true
-			case ~/.*?com\\jcraft.*/: return true
-			case ~/.*?isom.*/: return true
-			case ~/.*?ibxm.*/: return true
-			case ~/.*?de\\matthiasmann\\twl.*/: return true
-			case ~/.*?org\\xmlpull.*/: return true
-			case ~/.*?javax\\xml.*/: return true
-			case ~/.*?com\\fasterxml.*/: return true
-			case ~/.*?javax\\ws.*/: return true
-			default: return false
-		}
-	}
-
-	def static patch()
+	def static patchMCP()
 	{
 		// have to generate diffs... maybe...
-		def rawPatch = Arrays.asList(new File(Constants.DIR_FML_PATCHES, "minecraft_ff.patch").text.split(System.lineSeparator))
+		def rawPatch = new File(Constants.DIR_MCP_PATCHES, "minecraft_ff.patch").text.readLines()
 
 		def patchMap = [:]
 		def patternDiff = /diff.*?minecraft\\(.+?) .*?/
@@ -215,13 +203,39 @@ class Main
 		{
 			println "writing for "+it.getKey()
 			file = new File(Constants.DIR_SOURCES, it.getKey())
-			currentLines = Arrays.asList(file.text.split(System.lineSeparator))
+			currentLines = file.text.readLines()
 			newLines = DiffUtils.patch(currentLines, it.getValue())
 			text = newLines.join(System.lineSeparator)
 			file.write(text)
 		}
 
 		println "seems to have patched the lines now."
+	}
+	
+	def static applyPatches(File from, File to)
+	{
+		def patchMap = [:]
+		def newFile, patch; 
+		
+		// recurse through files
+		from.eachFileRecurse {
+			// if its a patch
+			if (it.isFile() && it.path.endsWith(".patch"))
+			{
+				newFile = new File(to, Util.getRelative(from, it).replace(/.patch/, ""))
+				patch = DiffUtils.parseUnifiedDiff(it.text.readLines())
+				patchMap.put(newFile, patch)
+			}
+		}
+		
+		def currentLines, newLines, text, file
+		patchMap.each
+		{
+			currentLines = it.getKey().text.readLines()
+			newLines = DiffUtils.patch(currentLines, it.getValue())
+			text = newLines.join(System.lineSeparator)
+			it.getKey().write(newLines)
+		}
 	}
 
 	def static downloadStuff()
@@ -268,6 +282,7 @@ class Main
 			if (it.isFile())
 				remapper.remapFile(dir, it)
 		}
+		
 	}
 	
 	def static formatSources(File dir)

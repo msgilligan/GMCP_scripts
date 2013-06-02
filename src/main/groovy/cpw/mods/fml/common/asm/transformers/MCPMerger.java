@@ -50,6 +50,7 @@ import com.google.common.collect.Sets;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+@SuppressWarnings("unused")
 public class MCPMerger
 {
 	private static Hashtable<String, ClassInfo>	clients			= new Hashtable<String, ClassInfo>();
@@ -323,6 +324,7 @@ public class MCPMerger
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static void copyClass(ZipFile inJar, ZipEntry entry, ZipOutputStream outJar, ZipOutputStream outJar2, boolean isClientOnly) throws IOException
 	{
 		ClassReader reader = new ClassReader(readEntry(inJar, entry));
@@ -356,6 +358,7 @@ public class MCPMerger
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static AnnotationNode getSideAnn(boolean isClientOnly)
 	{
 		AnnotationNode ann = new AnnotationNode(Type.getDescriptor(SideOnly.class));
