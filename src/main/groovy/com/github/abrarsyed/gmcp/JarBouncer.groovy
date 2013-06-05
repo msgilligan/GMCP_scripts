@@ -2,10 +2,14 @@ package com.github.abrarsyed.gmcp
 
 import java.lang.reflect.Method
 
+import org.eclipse.jdt.core.ToolFactory
+import org.eclipse.jdt.core.formatter.CodeFormatter
+import org.eclipse.jface.text.Document
+import org.eclipse.jface.text.IDocument
+import org.eclipse.text.edits.TextEdit
+
 import cpw.mods.fml.common.asm.transformers.MCPMerger
 import de.fernflower.main.decompiler.ConsoleDecompiler
-import com.github.abrarsyed.jastyle.ASFormatter
-import com.github.abrarsyed.jastyle.OptParser
 
 public class JarBouncer
 {
@@ -72,24 +76,35 @@ public class JarBouncer
 	{
 		try
 		{
-			ASFormatter formatter = new ASFormatter()
-			OptParser parser = new OptParser(formatter)
+			def config = [:]  // TODO" fill from astyle config  
 			
-			def errors =parser.parseOptionFile(astyleConf)
-			formatter.setBreakBlocksMode(true)
-			formatter.setDeleteEmptyLinesMode(false);
-						
-			
+			CodeFormatter formatter = ToolFactory.createCodeFormatter(config)
 			inputDir.eachFileRecurse {
-				if (it.isFile() && it.name.endsWith(".java"))
-					formatter.formatFile(it)
+				if (it.isFile() && it.getPath().endsWith(".java"))
+					doFormatFile(it, formatter)
 			}
-			
 		}
 		catch (Exception e)
 		{
-			System.err.println("JAStyle has failed!")
+			System.err.println("JDT formatter has failed!")
 			e.printStackTrace()
 		}
+	}
+
+	/**
+	 * Format individual file.
+	 */
+	private static void doFormatFile(File file, CodeFormatter formatter)
+	{
+		String code = file.text
+
+		TextEdit te = formatter.format(CodeFormatter.K_COMPILATION_UNIT, code,
+				0, code.length(), 0, System.lineSeparator)
+
+		IDocument doc = new Document(code)
+		te.apply(doc)
+		code = doc.get()
+
+		file.write(code)
 	}
 }
