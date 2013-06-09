@@ -14,6 +14,7 @@ import com.github.abrarsyed.gmcp.Constants.OperatingSystem
 import com.google.common.io.Files
 
 import difflib.DiffUtils
+import difflib.Patch
 
 class Main
 {
@@ -26,7 +27,7 @@ class Main
 	public static void main(args)
 	{
 		os = Util.getOS()
-		
+
 		println "cleaning up past builds...."
 		Util.createOrCleanDir(Constants.DIR_TEMP)
 		Util.createOrCleanDir(Constants.DIR_LOGS)
@@ -70,16 +71,19 @@ class Main
 		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
 
 		renameSources(Constants.DIR_SOURCES)
-		
+
 		println "FORMATTING SOURCES!!!!!!!!"
-		
+
 		formatSources(Constants.DIR_SOURCES)
-		
-		println "APPLYING FORGE AND FML PATCHES!!!!!!!!"
-		
+
+		println "APPLYING FML PATCHES =================================================="
+
 		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
+
+		println "APPLYING FORGE PATCHES =================================================="
+
 		applyPatches(Constants.DIR_FORGE_PATCHES, Constants.DIR_SOURCES)
-		
+
 		println "COMPLETE!"
 	}
 
@@ -88,9 +92,9 @@ class Main
 		JarBouncer.MCPMerger(client, server, new File(Constants.DIR_FML, "mcp_merge.cfg"))
 
 		// copy and strip META-INF
-		def output = new ZipOutputStream(Constants.JAR_MERGED.newDataOutputStream());
+		def output = new ZipOutputStream(Constants.JAR_MERGED.newDataOutputStream())
 		def ZipFile input = new ZipFile(Constants.JAR_CLIENT)
-		
+
 		input.entries().each{ ZipEntry it ->
 			if (it.name.contains("META-INF"))
 				return
@@ -98,10 +102,10 @@ class Main
 			{
 				output.putNextEntry(it)
 				output.write(input.getInputStream(it).bytes)
-				output.closeEntry();
+				output.closeEntry()
 			}
 		}
-		
+
 		input.close()
 		output.close()
 	}
@@ -211,12 +215,12 @@ class Main
 
 		println "seems to have patched the lines now."
 	}
-	
+
 	def static applyPatches(File from, File to)
 	{
-		def patchMap = [:]
-		def newFile, patch; 
-		
+		Map<File, Patch> patchMap = [:]
+		def newFile, patch
+
 		// recurse through files
 		from.eachFileRecurse {
 			// if its a patch
@@ -227,15 +231,27 @@ class Main
 				patchMap.put(newFile, patch)
 			}
 		}
-		
-		def currentLines, newLines, text, file
+
+		def currentLines, newLines, text, file, counter = 0, success = 0
 		patchMap.each
 		{
-			currentLines = it.getKey().text.readLines()
-			newLines = DiffUtils.patch(currentLines, it.getValue())
-			text = newLines.join(System.lineSeparator)
-			it.getKey().write(newLines)
+			try
+			{
+				currentLines = it.getKey().text.readLines()
+				newLines = it.getValue().applyTo(currentLines)
+				text = newLines.join(System.lineSeparator)
+				it.getKey().write(text)
+				println "success "+it.getKey()
+				success++
+			}
+			catch(Exception e)
+			{
+				println "error patching "+it.getKey()+"   skipping."
+			}
+			counter++
 		}
+
+		println success+" out of "+counter
 	}
 
 	def static downloadStuff()
@@ -271,7 +287,7 @@ class Main
 	def static renameSources(File dir)
 	{
 		def files = [:]
-		
+
 		Constants.CSVS.entrySet().every {
 			files[it.key] = new File(Constants.DIR_MAPPINGS, it.value)
 		}
@@ -282,11 +298,12 @@ class Main
 			if (it.isFile())
 				remapper.remapFile(dir, it)
 		}
-		
+
 	}
-	
+
 	def static formatSources(File dir)
 	{
-		JarBouncer.formatter(dir, new File(Constants.DIR_MAPPINGS, "astyle.cfg"))
+		// JarBouncer.formatter(dir, new File(Constants.DIR_MAPPINGS, "formatter.properties"))
+		JarBouncer.formatter(dir, new File("formatter.cfg"))
 	}
 }
