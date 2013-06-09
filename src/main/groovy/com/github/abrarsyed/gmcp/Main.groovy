@@ -303,7 +303,7 @@ class Main
 
 	def static formatSources(File dir)
 	{
-		// JarBouncer.formatter(dir, new File(Constants.DIR_MAPPINGS, "formatter.properties"))
-		JarBouncer.formatter(dir, new File("formatter.cfg"))
+		JarBouncer.formatter(dir, new File(Constants.DIR_MAPPINGS, "astyle.cfg"))
+		//JarBouncer.formatter(dir, new File("formatter.cfg"))
 	}
 }

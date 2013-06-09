@@ -2,11 +2,6 @@ package com.github.abrarsyed.gmcp
 
 import java.lang.reflect.Method
 
-import org.eclipse.jdt.core.ToolFactory
-import org.eclipse.jdt.core.formatter.CodeFormatter
-import org.eclipse.jface.text.Document
-import org.eclipse.text.edits.TextEdit
-
 import cpw.mods.fml.common.asm.transformers.MCPMerger
 import de.fernflower.main.decompiler.ConsoleDecompiler
 
@@ -71,50 +66,35 @@ public class JarBouncer
         MCPMerger.main(args)
     }
 
-    public static void formatter(File inputDir, File formatterConf)
+    public static void formatter(File inputDir, File astyleConf)
     {
         try
         {
-            def config = [:]
-
-            formatterConf.eachLine {
-                if (it == null || it.isEmpty())
-                    return
-
-                def split = it.split("=")
-                config[split[0].trim()] = split[1].trim()
-            }
-
-            CodeFormatter formatter = ToolFactory.createCodeFormatter(config)
+            // read property file.
+            def conf = []
+			
+			conf += "mode=java"
+			conf += "options="+astyleConf.getPath();
+            String options = conf.join(" ")
+            
+            // create an object
+            AstyleBouncer formatter = new AstyleBouncer()
+			println "Astyle version >> "+formatter.getVersion();
+            
+            String oldFile, newFile;
             inputDir.eachFileRecurse {
                 if (it.isFile() && it.getPath().endsWith(".java"))
-                    doFormatFile(it, formatter)
+                {
+                    oldFile = it.text
+                    newFile = formatter.formatSource(oldFile, options)
+                    it.write(newFile) 
+                }
             }
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            System.err.println("JDT formatter has failed!")
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * Format individual file.
-     */
-    private static void doFormatFile(File file, CodeFormatter formatter)
-    {
-        String code = file.text
-
-        TextEdit te = formatter.format(CodeFormatter.K_COMPILATION_UNIT, code, 0, code.length(), 0, null)
-
-        if (te != null)
-        {
-            Document doc = new Document(code)
-
-            te.apply(doc)
-            code = doc.get()
-
-            file.write(code)
+            System.err.println("AStyle has failed!")
+            t.printStackTrace()
         }
     }
 }

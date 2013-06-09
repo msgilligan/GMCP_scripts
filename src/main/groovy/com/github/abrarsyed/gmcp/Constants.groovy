@@ -4,6 +4,7 @@ public final class Constants
 {
 	// root dirs
 	public static final File	DIR_TEMP			= new File("tmp")
+    public static final File    DIR_NATIVES            = new File("natives")
 
 	// temp dirs
 	public static final File	DIR_LOGS			= new File(DIR_TEMP, "logs")
