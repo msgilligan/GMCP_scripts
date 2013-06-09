@@ -74,7 +74,14 @@ public class JarBouncer
             def conf = []
 			
 			conf += "mode=java"
-			conf += "options="+astyleConf.getPath();
+			
+            astyleConf.eachLine {
+                if (it == null || it.isEmpty() || it.startsWith("#"))
+                    return
+
+                conf += it
+            }
+
             String options = conf.join(" ")
             
             // create an object
