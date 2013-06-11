@@ -12,6 +12,7 @@ class SourceRemapper
 
 	final String PACKAGE = 'package net.minecraft.src;'
 	final String IMPORT = /(?m)^import net\.minecraft\.src\.(\w+);/
+	final String CUSTOM_IMPORT = /(?m)^import (?:%s)(\w+);?[\r\n]/
 	final String METHOD_SMALL = /func_[0-9]+_[a-zA-Z_]+/
 	final String FIELD_SMALL = /field_[0-9]+_[a-zA-Z_]+/
 	final String PARAM = /p_[\w]+_\d+_/
@@ -66,28 +67,44 @@ class SourceRemapper
 	 */
 	private String convertPackagePath(String newPackage)
 	{
-		return newPackage.replace("\\",'.').replace("/", '.')
+		newPackage.replace("\\",'.').replace("/", '.')
+	}
+	
+	private String getCustomImport(String pack)
+	{
+		String.format(CUSTOM_IMPORT, convertPackagePath(pack)).replace(".", /\./)
 	}
 
 	def remapFile(File root, File file)
 	{
 		def className = file.name.replace(".java", '')
 		def text = file.text
-		def newline, matcher
+		def newline, matcher, thisPack, remImport
 
 		// change package declaration
 		if (packages[className])
 		{
 			// change package definition
-			newline = "package "+convertPackagePath(packages[className])+";"
-			text.replace(PACKAGE, newline)
+			thisPack = convertPackagePath(packages[className])
+			newline = "package "+thisPack+";"
+			text = text.replace(PACKAGE, newline)
+			
+			// custom import.
+			remImport = getCustomImport(thisPack)
 
 			// change imports
 			text.findAll(IMPORT) { match, imported ->
+				// change to new packages
 				if (packages[imported])
 				{
-					newline = "import "+convertPackagePath(packages[imported])+"."+imported+";"
+					newline = "import "+thisPack+"."+imported+";"
 					text = text.replace(match, newline)
+				}
+				
+				// remove if non existant.
+				if (match ==~ remImport)
+				{
+					text = text.replace(match, "")
 				}
 			}
 		}

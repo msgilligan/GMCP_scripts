@@ -67,6 +67,13 @@ class Main
 		println "APPLYING MCP PATCHES!!!!!!!"
 
 		patchMCP()
+		
+		println "DOING FML FIXES!"
+		
+		Constants.DIR_SOURCES.eachFileRecurse {
+			if (it.isFile())
+				FMLCleanup.updateFile(it);
+		}
 
 		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
 
@@ -80,9 +87,9 @@ class Main
 
 		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
 
-		println "APPLYING FORGE PATCHES =================================================="
-
-		applyPatches(Constants.DIR_FORGE_PATCHES, Constants.DIR_SOURCES)
+//		println "APPLYING FORGE PATCHES =================================================="
+//
+//		applyPatches(Constants.DIR_FORGE_PATCHES, Constants.DIR_SOURCES)
 
 		println "COMPLETE!"
 	}
@@ -200,20 +207,15 @@ class Main
 			}
 		}
 
-		println "seems to have loaded patches"
-
 		def currentLines, newLines, text, file
 		patchMap.each
 		{
-			println "writing for "+it.getKey()
 			file = new File(Constants.DIR_SOURCES, it.getKey())
 			currentLines = file.text.readLines()
 			newLines = DiffUtils.patch(currentLines, it.getValue())
 			text = newLines.join(System.lineSeparator)
 			file.write(text)
 		}
-
-		println "seems to have patched the lines now."
 	}
 
 	def static applyPatches(File from, File to)

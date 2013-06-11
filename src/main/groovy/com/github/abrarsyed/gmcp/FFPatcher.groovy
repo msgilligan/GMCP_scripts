@@ -78,7 +78,7 @@ class FFPatcher
 				interfaces = inters.findAll(REG['list'])
 			}
 
-			text.replace(match, processEnum(classname, type, mods, interfaces, body, end))
+			text = text.replace(match, processEnum(classname, type, mods, interfaces, body, end))
 		}
 
 		text = text.replaceAll(REG["empty_super"], "")
@@ -105,11 +105,11 @@ class FFPatcher
 				entryBody = "($matchBody)"
 			}
 
-			body.replace(match, '   ' + matchName + entryBody + matchEnd)
+			body = body.replace(match, '   ' + matchName + entryBody + matchEnd)
 		}
 
 		def valuesRegex = String.format(REG_FORMAT['enumVals'], classname, classname)
-		body.replaceAll(valuesRegex, "")
+		body = body.replaceAll(valuesRegex, "")
 
 		def conRegex = String.format(REG_FORMAT['constructor'], classname)
 		def match = Pattern.compile(conRegex).matcher(body)
@@ -150,7 +150,7 @@ class FFPatcher
 				methodEnd = match.group('end')
 			}
 
-			body.replace(match.group(), processConstructor(classname, mods, params, exc, methodBody, methodEnd))
+			body = body.replace(match.group(), processConstructor(classname, mods, params, exc, methodBody, methodEnd))
 		}
 
 		// rebuild enum
