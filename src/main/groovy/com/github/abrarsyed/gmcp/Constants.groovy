@@ -4,7 +4,7 @@ public final class Constants
 {
 	// root dirs
 	public static final File	DIR_TEMP			= new File("tmp")
-    public static final File    DIR_NATIVES            = new File("natives")
+	public static final File    DIR_NATIVES            = new File("natives")
 
 	// temp dirs
 	public static final File	DIR_LOGS			= new File(DIR_TEMP, "logs")
@@ -30,6 +30,7 @@ public final class Constants
 	public static final String 	URL_MC_JAR 			= "http://assets.minecraft.net/%s/minecraft.jar"
 	public static final String 	URL_MCSERVER_JAR 	= "http://assets.minecraft.net/%s/minecraft_server.jar"
 	public static final String 	URL_LIB_ROOT 		= "http://s3.amazonaws.com/MinecraftDownload/"
+	public static final String	URL_JSON_FORGE 		= "http://files.minecraftforge.net/minecraftforge/json"
 
 	// normal MC version form
 	public static final String 	URL_FORGE 			= "http://files.minecraftforge.net/minecraftforge/minecraftforge-src-%s-%s.zip"
@@ -47,7 +48,7 @@ public final class Constants
 		MAC: "macosx_natives.jar",
 		LINUX: "linux_natives.jar"
 	]
-	
+
 	// CSVs
 	public static final CSVS = [
 		methods:"methods.csv",

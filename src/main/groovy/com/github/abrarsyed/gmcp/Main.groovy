@@ -281,7 +281,7 @@ class Main
 
 		println "Downloading Forge"
 		def forge = new File(Constants.DIR_TEMP, "forge.zip")
-		Util.download(String.format(Constants.URL_FORGE, MC_VERSION, FORGE_VERSION), forge)
+		Util.download(ForgeVersionGetter.getUrl(MC_VERSION), forge)
 		Util.unzip(forge, Constants.DIR_TEMP, true)
 		forge.delete()
 	}
