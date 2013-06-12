@@ -17,7 +17,7 @@ public class AStyleInterface
     */
     static
     { // load shared library from the classpath
-        File os = new File(Constants.DIR_NATIVES, Main.os.name());
+        File os = new File(Constants.DIR_NATIVES, "2.02.1\\"+Main.os.name());
         File arch = new File(os, System.getProperty("os.arch").replace("\\W", ""));
         File file = new File(arch, System.mapLibraryName("AStylej"));
         System.load(file.getAbsolutePath());

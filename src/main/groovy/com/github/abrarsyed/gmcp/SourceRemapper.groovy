@@ -151,7 +151,8 @@ class SourceRemapper
 		matcher = text =~ PARAM
 		while(matcher.find())
 		{
-			text = text.replace(matcher.group(), params[matcher.group()])
+			if (params[matcher.group()])
+				text = text.replace(matcher.group(), params[matcher.group()])
 		}
 
 		// FAR all methods
