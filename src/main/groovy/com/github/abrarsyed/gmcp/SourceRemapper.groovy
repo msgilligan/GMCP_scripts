@@ -8,11 +8,7 @@ class SourceRemapper
 	def Map methods
 	def Map fields
 	def Map params
-	def Map packages
 
-	final String PACKAGE = 'package net.minecraft.src;'
-	final String IMPORT = /(?m)^import net\.minecraft\.src\.(\w+);/
-	final String CUSTOM_IMPORT = /(?m)^import (?:%s)(\w+);?[\r\n]/
 	final String METHOD_SMALL = /func_[0-9]+_[a-zA-Z_]+/
 	final String FIELD_SMALL = /field_[0-9]+_[a-zA-Z_]+/
 	final String PARAM = /p_[\w]+_\d+_/
@@ -41,13 +37,6 @@ class SourceRemapper
 		{
 			params[it[0]] = it[1]
 		}
-
-		reader = getReader(files["packages"])
-		packages = [:]
-		reader.readAll().each
-		{
-			packages[it[0]] = it[1]
-		}
 	}
 
 	private CSVReader getReader(File file)
@@ -62,52 +51,10 @@ class SourceRemapper
 		out += indent+" */"+System.lineSeparator
 	}
 
-	/**
-	 * Converts a package path to a proper package declaration
-	 */
-	private String convertPackagePath(String newPackage)
+	def remapFile(File file)
 	{
-		newPackage.replace("\\",'.').replace("/", '.')
-	}
-	
-	private String getCustomImport(String pack)
-	{
-		String.format(CUSTOM_IMPORT, convertPackagePath(pack)).replace(".", /\./)
-	}
-
-	def remapFile(File root, File file)
-	{
-		def className = file.name.replace(".java", '')
 		def text = file.text
-		def newline, matcher, thisPack, remImport
-
-		// change package declaration
-		if (packages[className])
-		{
-			// change package definition
-			thisPack = convertPackagePath(packages[className])
-			newline = "package "+thisPack+";"
-			text = text.replace(PACKAGE, newline)
-			
-			// custom import.
-			remImport = getCustomImport(thisPack)
-
-			// change imports
-			text.findAll(IMPORT) { match, imported ->
-				// change to new packages
-				if (packages[imported])
-				{
-					newline = "import "+thisPack+"."+imported+";"
-					text = text.replace(match, newline)
-				}
-				
-				// remove if non existant.
-				if (match ==~ remImport)
-				{
-					text = text.replace(match, "")
-				}
-			}
-		}
+		def newline, matcher
 
 		// search methods to javadoc
 		text.findAll(METHOD) { match, indent, name ->
@@ -169,17 +116,6 @@ class SourceRemapper
 		{
 			if (fields[matcher.group()])
 				text = text.replace(matcher.group(), fields[matcher.group()]['name'])
-		}
-
-		if (packages[className])
-		{
-			// delete old file.
-			file.delete()
-
-			// replace file with new file
-			file = new File(root, packages[className])
-			file.mkdirs()
-			file = new File(file, className+".java")
 		}
 
 		// write file

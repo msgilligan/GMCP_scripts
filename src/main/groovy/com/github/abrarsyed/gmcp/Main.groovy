@@ -74,19 +74,27 @@ class Main
 			if (it.isFile())
 				FMLCleanup.updateFile(it);
 		}
+		
+		println "FIXING PACKAGES!!!!!!!!"
+		
+		def fixer = new PackageFixer(new File(Constants.DIR_MAPPINGS, Constants.CSVS["packages"]))
+		Constants.DIR_SOURCES.eachFileRecurse {
+			if (it.isFile())
+				fixer.fixPackages(Constants.DIR_SOURCES, it);
+		}
 
-		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
-
-		renameSources(Constants.DIR_SOURCES)
+//		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
+//
+//		renameSources(Constants.DIR_SOURCES)
 
 		println "FORMATTING SOURCES!!!!!!!!"
 
 		formatSources(Constants.DIR_SOURCES)
-
-		println "APPLYING FML PATCHES =================================================="
-
-		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
-
+//
+//		println "APPLYING FML PATCHES =================================================="
+//
+//		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
+//
 //		println "APPLYING FORGE PATCHES =================================================="
 //
 //		applyPatches(Constants.DIR_FORGE_PATCHES, Constants.DIR_SOURCES)
@@ -281,7 +289,8 @@ class Main
 
 		println "Downloading Forge"
 		def forge = new File(Constants.DIR_TEMP, "forge.zip")
-		Util.download(ForgeVersionGetter.getUrl(MC_VERSION), forge)
+		//Util.download(ForgeVersionGetter.getUrl(MC_VERSION), forge)
+		Util.download(String.format(Constants.URL_FORGE, MC_VERSION, FORGE_VERSION), forge)
 		Util.unzip(forge, Constants.DIR_TEMP, true)
 		forge.delete()
 	}
@@ -298,7 +307,7 @@ class Main
 
 		dir.eachFileRecurse {
 			if (it.isFile())
-				remapper.remapFile(dir, it)
+				remapper.remapFile(it)
 		}
 
 	}
