@@ -40,6 +40,18 @@ class Main
 
 		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
 
+		println "FIXING PACKAGES!!!!!!!!"
+
+		// creates the package fixer
+		(new PackageFixer(new File(Constants.DIR_MAPPINGS, Constants.CSVS["packages"]))).with {
+			// calls the following on the package fixer.
+			// gotta love groovy :)
+			fixSRG(new File(Constants.DIR_MAPPINGS, "joined.srg"), new File(Constants.DIR_MAPPINGS, "packaged.srg"))
+			fixExceptor(new File(Constants.DIR_MAPPINGS, "joined.exc"), new File(Constants.DIR_MAPPINGS, "packaged.exc"))
+			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_ff.patch"))
+			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_server_ff.patch"))
+		}
+
 		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
 
 		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
@@ -67,37 +79,26 @@ class Main
 		println "APPLYING MCP PATCHES!!!!!!!"
 
 		patchMCP()
-		
-		println "DOING FML FIXES!"
-		
-		Constants.DIR_SOURCES.eachFileRecurse {
-			if (it.isFile())
-				FMLCleanup.updateFile(it);
-		}
-		
-		println "FIXING PACKAGES!!!!!!!!"
-		
-		def fixer = new PackageFixer(new File(Constants.DIR_MAPPINGS, Constants.CSVS["packages"]))
-		Constants.DIR_SOURCES.eachFileRecurse {
-			if (it.isFile())
-				fixer.fixPackages(Constants.DIR_SOURCES, it);
-		}
 
-//		println "REMAPPING SOURCES AND INJECTING JAVADOCS!!!!!!!!"
-//
-//		renameSources(Constants.DIR_SOURCES)
+		println "DOING FML FIXES!"
+
+		Constants.DIR_SOURCES.eachFileRecurse {
+			if (it.isFile())
+				FMLCleanup.updateFile(it)
+		}
 
 		println "FORMATTING SOURCES!!!!!!!!"
 
 		formatSources(Constants.DIR_SOURCES)
-//
-//		println "APPLYING FML PATCHES =================================================="
-//
-//		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
-//
-//		println "APPLYING FORGE PATCHES =================================================="
-//
-//		applyPatches(Constants.DIR_FORGE_PATCHES, Constants.DIR_SOURCES)
+
+
+		println "APPLYING FML PATCHES =================================================="
+
+		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
+		//
+		//		println "APPLYING FORGE PATCHES =================================================="
+		//
+		//		applyPatches(Constants.DIR_FORGE_PATCHES, Constants.DIR_SOURCES)
 
 		println "COMPLETE!"
 	}
@@ -135,7 +136,7 @@ class Main
 	{
 		// load mapping
 		JarMapping mapping = new JarMapping()
-		mapping.loadMappings(new File(Constants.DIR_MAPPINGS, "joined.srg"))
+		mapping.loadMappings(new File(Constants.DIR_MAPPINGS, "packaged.srg"))
 
 		// load in AT
 		def accessMap = new AccessMap()
@@ -155,7 +156,7 @@ class Main
 
 	def static inject()
 	{
-		JarBouncer.injector(Constants.JAR_DEOBF, Constants.JAR_EXCEPTOR, new File(Constants.DIR_MAPPINGS, "joined.exc"))
+		JarBouncer.injector(Constants.JAR_DEOBF, Constants.JAR_EXCEPTOR, new File(Constants.DIR_MAPPINGS, "packaged.exc"))
 	}
 
 	def static copyClasses(File inDir, File outDir)
@@ -269,6 +270,8 @@ class Main
 		def root = Constants.DIR_MC_JARS
 		if (!root.exists() || !root.isDirectory())
 			root.mkdirs()
+
+		// TODO: Downlaod forge, and then read forge configs for it.
 
 		println "Downloading Minecraft"
 		def mcver = MC_VERSION.replaceAll(/\./, /_/)
