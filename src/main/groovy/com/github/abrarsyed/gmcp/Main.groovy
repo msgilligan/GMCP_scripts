@@ -9,6 +9,9 @@ import net.md_5.specialsource.Jar
 import net.md_5.specialsource.JarMapping
 import net.md_5.specialsource.JarRemapper
 import net.md_5.specialsource.RemapperPreprocessor
+import net.md_5.specialsource.provider.ClassLoaderProvider
+import net.md_5.specialsource.provider.JarProvider
+import net.md_5.specialsource.provider.JointProvider
 
 import com.github.abrarsyed.gmcp.Constants.OperatingSystem
 import com.google.common.io.Files
@@ -149,6 +152,11 @@ class Main
 
 		// load jar
 		Jar input = Jar.init(inJar)
+
+		// ensure that inheritance provider is used
+		JointProvider inheritanceProviders = new JointProvider()
+		inheritanceProviders.add(new JarProvider(input))
+		mapping.setFallbackInheritanceProvider(inheritanceProviders)
 
 		// remap jar
 		remapper.remapJar(input, outJar)
