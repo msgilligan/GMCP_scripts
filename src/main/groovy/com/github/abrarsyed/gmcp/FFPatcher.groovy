@@ -1,7 +1,7 @@
 package com.github.abrarsyed.gmcp
 
-import java.util.regex.Pattern
-
+import com.google.code.regexp.Matcher
+import com.google.code.regexp.Pattern
 import com.google.common.base.Strings
 
 class FFPatcher
@@ -86,7 +86,7 @@ class FFPatcher
 		text = text.replaceAll(REG["newlines"], System.lineSeparator)
 		text = text.replaceAll(REG["trailing"], "")
 
-		def sep = System.lineSeparator
+		def sep = System.lineSeperator
 		def specialSep = "Z@Z@Z"
 
 		text = text.replaceAll(/(\r\n|\r|\n)/, sep)
@@ -112,7 +112,7 @@ class FFPatcher
 		body = body.replaceAll(valuesRegex, "")
 
 		def conRegex = String.format(REG_FORMAT['constructor'], classname)
-		def match = Pattern.compile(conRegex).matcher(body)
+		Matcher match = Pattern.compile(conRegex).matcher(body)
 		// process constructors
 		while (match.find())
 		{

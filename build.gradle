@@ -3,7 +3,7 @@ apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.6
 version = '0.1-SNAPSHOT'
 archivesBaseName = 'GMCP'
 
@@ -31,18 +31,23 @@ dependencies {
 	compile 'net.sourceforge.argo:argo:3.4'
 	compile 'net.sf.opencsv:opencsv:2.3'
 	
+	// needed for stuff
 	compile 'com.googlecode.java-diff-utils:diffutils:1.2'
 	compile 'net.md-5:SpecialSource:1.5'
+	
+	// till I can ensure that everyone uses JDK7 and its nice named regexes.
+	compile 'com.github.tony19:named-regexp:0.1.9'
 	
 	// YAY, ITS ON MAVEN CENTRAL!    but its not working :(
 	//compile 'com.github.abrarsyed.jastyle:jAstyle:0.8'
 	
-	// JDT
-	compile "org.jibx.config.3rdparty.org.eclipse:org.eclipse.core.resources:3.7.100.v20110510-0712"
-	runtime "org.jibx.config.3rdparty.org.eclipse:org.eclipse.core.runtime:3.7.0.v20110110"
-	compile "org.jibx.config.3rdparty.org.eclipse:org.eclipse.equinox.common:3.6.0.v20110523"
-	compile "org.eclipse.tycho:org.eclipse.jdt.core:3.8.1.v20120125-1544"
-	compile "org.jibx.config.3rdparty.org.eclipse:org.eclipse.text:3.5.100.v20110505-0800"
+	// JDT   using Astyle natives for now
+//	compile "org.jibx.config.3rdparty.org.eclipse:org.eclipse.core.resources:3.7.100.v20110510-0712"
+//	runtime "org.jibx.config.3rdparty.org.eclipse:org.eclipse.core.runtime:3.7.0.v20110110"
+//	compile "org.jibx.config.3rdparty.org.eclipse:org.eclipse.equinox.common:3.6.0.v20110523"
+//	compile "org.eclipse.tycho:org.eclipse.jdt.core:3.8.1.v20120125-1544"
+//	compile "org.jibx.config.3rdparty.org.eclipse:org.eclipse.text:3.5.100.v20110505-0800"
 	
-	compile 'org.projectlombok:lombok:0.11.6'
+	// not used.
+//	compile 'org.projectlombok:lombok:0.11.6'
 }

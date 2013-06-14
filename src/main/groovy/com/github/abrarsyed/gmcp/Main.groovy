@@ -9,7 +9,6 @@ import net.md_5.specialsource.Jar
 import net.md_5.specialsource.JarMapping
 import net.md_5.specialsource.JarRemapper
 import net.md_5.specialsource.RemapperPreprocessor
-import net.md_5.specialsource.provider.ClassLoaderProvider
 import net.md_5.specialsource.provider.JarProvider
 import net.md_5.specialsource.provider.JointProvider
 
@@ -94,10 +93,15 @@ class Main
 
 		formatSources(Constants.DIR_SOURCES)
 
-
 		println "APPLYING FML PATCHES =================================================="
 
 		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
+
+		//		println "RENAMING SOURCES TO NICE NAMES =================================================="
+		//
+		//		renameSources(Constants.DIR_SOURCES)
+		//
+		//
 		//
 		//		println "APPLYING FORGE PATCHES =================================================="
 		//
