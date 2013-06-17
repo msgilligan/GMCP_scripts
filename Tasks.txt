@@ -31,3 +31,9 @@ Set of tasks that need to be done      Starts at ${forgedir}/install.py
      > replace openGL constants -> ${mcpDir}/runtime/pylibs/annotate_gl_constants.py
      > apply astyle
    > rename sources to MCP names from csv (DISABLED BY FML. THIS IS JUST FOR REFERENCE.)
+- strip meta-inf from jars, and back them up
+- cleanup sources (fml style)
+- update MD5s (unnecessary in GMCP)
+
+>> apply_fml_patches  phase << ${forgedir}/fml/fml.py
+-------------------------------
