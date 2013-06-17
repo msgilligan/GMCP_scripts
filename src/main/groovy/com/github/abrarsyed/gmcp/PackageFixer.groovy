@@ -58,7 +58,7 @@ public class PackageFixer
 			}
 
 			line = sections.join(" ")
-			outText.append(line).append(System.lineSeparator)
+			outText.append(line).append("\n")
 		}
 
 		outSRG.write(outText.toString())
@@ -98,7 +98,7 @@ public class PackageFixer
 			def sig = repackageSig(it.substring(methName.length()))
 			cls = repackageClass(cls)
 
-			outText.append(cls + "."+methName + "="+named+System.lineSeparator)
+			outText.append(cls + "."+methName + "="+named+"\n")
 		}
 
 		outExc.write(outText.toString())

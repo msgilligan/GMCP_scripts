@@ -1,5 +1,6 @@
-package com.github.abrarsyed.gmcp
+package com.github.abrarsyed.gmcp.source
 
+import com.github.abrarsyed.gmcp.Util
 import com.google.code.regexp.Matcher
 import com.google.code.regexp.Pattern
 import com.google.common.base.Strings
@@ -83,10 +84,10 @@ class FFPatcher
 
 		text = text.replaceAll(REG["empty_super"], "")
 		text = text.replaceAll(REG["trailingzero"], "")
-		text = text.replaceAll(REG["newlines"], System.lineSeparator)
+		text = text.replaceAll(REG["newlines"], "\n")
 		text = text.replaceAll(REG["trailing"], "")
 
-		def sep = System.lineSeperator
+		def sep = "\n"
 		def specialSep = "Z@Z@Z"
 
 		text = text.replaceAll(/(\r\n|\r|\n)/, sep)

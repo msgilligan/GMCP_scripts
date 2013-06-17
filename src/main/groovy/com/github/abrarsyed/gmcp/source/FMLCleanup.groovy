@@ -1,4 +1,4 @@
-package com.github.abrarsyed.gmcp
+package com.github.abrarsyed.gmcp.source
 
 class FMLCleanup
 {

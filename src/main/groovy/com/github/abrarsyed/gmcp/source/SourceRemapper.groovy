@@ -1,4 +1,4 @@
-package com.github.abrarsyed.gmcp
+package com.github.abrarsyed.gmcp.source
 
 import au.com.bytecode.opencsv.CSVParser
 import au.com.bytecode.opencsv.CSVReader
@@ -46,9 +46,9 @@ class SourceRemapper
 
 	private buildJavadoc(indent, javadoc)
 	{
-		def out = indent+"/**"+System.lineSeparator
-		out += indent+" * "+javadoc+System.lineSeparator
-		out += indent+" */"+System.lineSeparator
+		def out = indent+"/**\n"
+		out += indent+" * "+javadoc+"\n"
+		out += indent+" */\n"
 	}
 
 	def remapFile(File file)

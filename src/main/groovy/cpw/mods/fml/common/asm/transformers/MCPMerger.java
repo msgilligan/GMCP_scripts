@@ -62,7 +62,7 @@ public class MCPMerger
 	private static final boolean				DEBUG			= false;
 
 	/**
-	 * fml/mcpmerg.cfg     minecrafy.jar     minecraft_server.jar
+	 * fml/mcpmerg.cfg     minecraft.jar     minecraft_server.jar
 	 * @param args mapFile, client, server
 	 */
 	public static void main(String[] args)

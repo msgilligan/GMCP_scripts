@@ -13,6 +13,10 @@ import net.md_5.specialsource.provider.JarProvider
 import net.md_5.specialsource.provider.JointProvider
 
 import com.github.abrarsyed.gmcp.Constants.OperatingSystem
+import com.github.abrarsyed.gmcp.source.FFPatcher
+import com.github.abrarsyed.gmcp.source.FMLCleanup
+import com.github.abrarsyed.gmcp.source.MCPCleanup
+import com.github.abrarsyed.gmcp.source.SourceRemapper
 import com.google.common.io.Files
 
 import difflib.DiffUtils
@@ -82,16 +86,16 @@ class Main
 
 		patchMCP()
 
+		println "FORMATTING SOURCES!!!!!!!!"
+
+		formatSources(Constants.DIR_SOURCES)
+
 		println "DOING FML FIXES!"
 
 		Constants.DIR_SOURCES.eachFileRecurse {
 			if (it.isFile())
 				FMLCleanup.updateFile(it)
 		}
-
-		println "FORMATTING SOURCES!!!!!!!!"
-
-		formatSources(Constants.DIR_SOURCES)
 
 		println "APPLYING FML PATCHES =================================================="
 
@@ -234,7 +238,7 @@ class Main
 			file = new File(Constants.DIR_SOURCES, it.getKey())
 			currentLines = file.text.readLines()
 			newLines = DiffUtils.patch(currentLines, it.getValue())
-			text = newLines.join(System.lineSeparator)
+			text = newLines.join("\n")
 			file.write(text)
 		}
 	}
@@ -262,7 +266,7 @@ class Main
 			{
 				currentLines = it.getKey().text.readLines()
 				newLines = it.getValue().applyTo(currentLines)
-				text = newLines.join(System.lineSeparator)
+				text = newLines.join("\n")
 				it.getKey().write(text)
 				println "success "+it.getKey()
 				success++
@@ -329,6 +333,9 @@ class Main
 
 	def static formatSources(File dir)
 	{
+		// do cleanup
+		MCPCleanup.cleanDir(dir)
+
 		JarBouncer.formatter(dir, new File(Constants.DIR_MAPPINGS, "astyle.cfg"))
 		//JarBouncer.formatter(dir, new File("formatter.cfg"))
 	}
