@@ -113,6 +113,8 @@ public class PackageFixer
 			def cls = repackageClass(match.replace('\\', '/')).replace('/', '\\')
 			text = text.replace(match, cls)
 		}
+		
+		text.replaceAll(/(\r\n|\n|\r)/, "\n")
 
 		patch.write(text)
 	}
@@ -125,7 +127,6 @@ public class PackageFixer
 			if (packages[className])
 				return packages[className]+"/"+className
 		}
-
 
 		return input
 	}

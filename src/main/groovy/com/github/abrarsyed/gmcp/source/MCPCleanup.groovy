@@ -1,6 +1,5 @@
 package com.github.abrarsyed.gmcp.source
 
-import com.github.abrarsyed.gmcp.Util
 
 public class MCPCleanup
 {
@@ -20,6 +19,8 @@ public class MCPCleanup
 		text = stripComments(text)
 
 		text = GLConstantFixer.fixOGL(text)
+
+		text = fixImports(text)
 
 		text = cleanup(text)
 
@@ -55,7 +56,7 @@ public class MCPCleanup
 
 		'package': /(?m)^package ([\w.]+);$/, // find package --- in quots since its a special word
 
-		'import': /(?m)^import (?:([\w.]*?)\.)?([\w]+);\n/, // package and class.
+		'import': /(?m)^import (?:([\w.]*?)\.)?(?:[\w]+);\n/, // package and class.
 
 		newlines: /(?m)^\n{2,}/, // remove repeated blank lines   ?? JDT?
 
@@ -166,8 +167,7 @@ public class MCPCleanup
 		text = text.replaceAll(REGEXP_CLEANUP['blockstarts'], "")
 		text = text.replaceAll(REGEXP_CLEANUP['blockends'], "")
 		text = text.replaceAll(REGEXP_CLEANUP['gl'], "")
-		text = text.replaceAll(REGEXP_CLEANUP['maxD'], "")
-		text = text.replaceAll(REGEXP_CLEANUP['header'], "Double.MAX_VALUE")
+		text = text.replaceAll(REGEXP_CLEANUP['maxD'], "Double.MAX_VALUE")
 
 		// unicode?    CONTITIONAL
 		text.findAll(REGEXP_CLEANUP['unicode']) { match, val ->
@@ -209,16 +209,19 @@ public class MCPCleanup
 		return text
 	}
 
-	private static String finxImports(String text)
+	private static String fixImports(String text)
 	{
 		def match = text =~ REGEXP_CLEANUP['package']
 
-		// it had better have a package....
-		def pack = match[0][1]
+		if (match)
+		{
+			// it had better have a package....
+			def pack = match[0][1]
 
-		text.findAll(REGEXP_CLEANUP['import']) { full, found ->
-			if (found == pack)
-				text = text.replace(full, '')
+			text.findAll(REGEXP_CLEANUP['import']) { full, found ->
+				if (found == pack)
+					text = text.replace(full, '')
+			}
 		}
 
 		return text

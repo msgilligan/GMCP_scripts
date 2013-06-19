@@ -87,10 +87,7 @@ class FFPatcher
 		text = text.replaceAll(REG["newlines"], "\n")
 		text = text.replaceAll(REG["trailing"], "")
 
-		def sep = "\n"
-		def specialSep = "Z@Z@Z"
-
-		text = text.replaceAll(/(\r\n|\r|\n)/, sep)
+		text = text.replaceAll(/(\r\n|\r|\n)/, "\n")
 
 		file.write(text)
 	}

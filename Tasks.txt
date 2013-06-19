@@ -4,10 +4,12 @@ Set of tasks that need to be done      Starts at ${forgedir}/install.py
 
 >> setup_mcp  phase <<   ${forgedir}/fml/fml.py
 -------------------------------
+- patch commands.py
 - gen_renamed_conf
+	> edit MCP patches with new packages as well
 	> edit SRG with packages from csv
 	> edit exc config with packages from csv
-	> edit MCP patches with new packages as well
+- update eclipse workspace
 -------------------------------
 
 >> setup_fml  phase << ${forgedir}/fml/fml.py
@@ -33,12 +35,14 @@ Set of tasks that need to be done      Starts at ${forgedir}/install.py
 - strip meta-inf from jars, and back them up
 - cleanup sources (fml style)
 - update MD5s (unnecessary in GMCP)
+-------------------------------
 
 >> apply_fml_patches  phase << ${forgedir}/fml/fml.py
 -------------------------------
-- apply FMl p-atches
+- apply FMl patches
 - copy FML sources
 - delete argo sources
+-------------------------------
 
 >> finish_fml_setup  phase << ${forgedir}/fml/fml.py
 -------------------------------
@@ -46,3 +50,4 @@ Set of tasks that need to be done      Starts at ${forgedir}/install.py
 	> process CSvs
 	> process javadocs
 	> rename sources
+-------------------------------
