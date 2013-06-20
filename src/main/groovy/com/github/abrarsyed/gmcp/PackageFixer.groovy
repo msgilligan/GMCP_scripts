@@ -98,7 +98,7 @@ public class PackageFixer
 			def sig = repackageSig(it.substring(methName.length()))
 			cls = repackageClass(cls)
 
-			outText.append(cls + "."+methName + "="+named+"\n")
+			outText.append(cls + "." + methName + sig + "=" + named + "\n")
 		}
 
 		outExc.write(outText.toString())
@@ -113,7 +113,7 @@ public class PackageFixer
 			def cls = repackageClass(match.replace('\\', '/')).replace('/', '\\')
 			text = text.replace(match, cls)
 		}
-		
+
 		text.replaceAll(/(\r\n|\n|\r)/, "\n")
 
 		patch.write(text)
