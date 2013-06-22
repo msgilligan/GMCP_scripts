@@ -10,9 +10,6 @@ class FMLCleanup
 	public static void updateFile(File f)
 	{
 		def text = f.text
-		
-		if (f.getPath().contains("GuiMainMenu"))
-			println "WHAT!"
 
 		text.findAll(before) { match, group, words->
 			text = text.replace(match, group)
@@ -141,26 +138,31 @@ class FMLCleanup
 		return output.substring(0, output.length()-1)
 	}
 
-	private last = [
-		'byte':     [0, 0, ['b']],
-		'char':     [0, 0, ['c']],
-		'short':    [1, 0, ['short']],
-		'int':      [0, 1, ['i', 'j', 'k', 'l']],
-		'boolean':  [0, 1, ['flag']],
-		'double':   [0, 0, ['d']],
-		'float':    [0, 1, ['f']],
-		'File':     [1, 1, ['file']],
-		'String':   [0, 1, ['s']],
-		'Class':    [0, 1, ['oclass']],
-		'Long':     [0, 1, ['olong']],
-		'Byte':     [0, 1, ['obyte']],
-		'Short':    [0, 1, ['oshort']],
-		'Boolean':  [0, 1, ['obool']],
-		'Package':  [0, 1, ['opackage']]]
+	def last, remap
 
-	private remap = [
-		'long': 'int',
-	]
+	private FMLCleanup()
+	{
+		last = [
+			'byte':     [0, 0, ['b']],
+			'char':     [0, 0, ['c']],
+			'short':    [1, 0, ['short']],
+			'int':      [0, 1, ['i', 'j', 'k', 'l']],
+			'boolean':  [0, 1, ['flag']],
+			'double':   [0, 0, ['d']],
+			'float':    [0, 1, ['f']],
+			'File':     [1, 1, ['file']],
+			'String':   [0, 1, ['s']],
+			'Class':    [0, 1, ['oclass']],
+			'Long':     [0, 1, ['olong']],
+			'Byte':     [0, 1, ['obyte']],
+			'Short':    [0, 1, ['oshort']],
+			'Boolean':  [0, 1, ['obool']],
+			'Package':  [0, 1, ['opackage']]]
+
+		remap = [
+			'long': 'int',
+		]
+	}
 
 	private String getName(String type, String var)
 	{
@@ -171,33 +173,29 @@ class FMLCleanup
 		else if (remap.containsKey(type))
 			index = remap[type]
 
+		if (!index && (type =~ /^[A-Z]/ || type =~ /(\[|\.\.\.)/))
+		{
+			type = type.replace('...', '[]')
+
+			while(type.contains("[][]"))
+				type = type.replaceAll(/\[\]\[\]/, "[]")
+
+			def name = type.toLowerCase()
+
+			if (type =~ /\[/)
+			{
+				name = "a"+name
+				name = name.replace('[', '').replace(']', '').replace('...', '')
+			}
+
+			last[type] = [0, 1, [name]]
+			index = type
+		}
+		
 		if (!index)
 		{
-			if ((type =~ /^[A-Z]/ || type =~ /(\[|\.\.\.)/))
-			{
-				type = type.replace('...', '[]')
-
-				while(type.contains("[][]"))
-					type = type.replaceAll(/\[\]\[\]/, "[]")
-
-				def name = type.toLowerCase()
-				def skip = 1
-
-				if (type =~ /\[/)
-				{
-					skip = 1
-					name = "a"+name
-					name = name.replace('[', '').replace(']', '').replace('...', '')
-				}
-
-				last[type] = [0, skip, [name]]
-				index = type
-			}
-			else
-			{
-				println "NO DATA FOR TYPE $type $var"
-				return type
-			}
+			println "NO DATA FOR TYPE $type $var"
+			return type
 		}
 
 		def id = last[index][0]
@@ -211,8 +209,8 @@ class FMLCleanup
 			return data[0] + ( !id && skip_zero ? '' : id)
 		else
 		{
-			def num = id/amount
-			return data[id % amount] + ( !id && skip_zero ? '' : id)
+			def num = (int)id/amount
+			return data[id % amount] + ( !num && skip_zero ? '' : num)
 		}
 	}
 }
