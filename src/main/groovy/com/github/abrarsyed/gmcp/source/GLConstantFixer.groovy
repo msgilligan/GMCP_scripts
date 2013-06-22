@@ -1322,7 +1322,7 @@ class GLConstantFixer
 		
 		if (!text.contains("import "+imp+";\n"))
 		{
-			text = text.replace("(import "+addAfter+";\n)", "\1"+"import "+imp+";\n")
+			text = text.replace("import "+addAfter+";\n", "import "+addAfter+";\n"+"import "+imp+";\n")
 		}
 		
 		return text

@@ -18,11 +18,11 @@ public class MCPCleanup
 
 		text = stripComments(text)
 
-		text = GLConstantFixer.fixOGL(text)
-
 		text = fixImports(text)
 
 		text = cleanup(text)
+		
+		text = GLConstantFixer.fixOGL(text)
 
 		file.write(text)
 	}
@@ -35,7 +35,7 @@ public class MCPCleanup
 
 	private static String stripComments(String text)
 	{
-		text.findAll(REGEXP_COMMENTS["trailing"])
+		text.findAll(REGEXP_COMMENTS["comments"])
 		{ match ->
 			if (match.startsWith("/"))
 				text = text.replace(match, "")
@@ -174,7 +174,7 @@ public class MCPCleanup
 			def value = Integer.parseInt(val, 16)
 			// work around the replace('\u00a7', '$') call in MinecraftServer and a couple of '\u0000'
 			if (value > 255)
-				text = text.replace(match, ''+val)
+				text = text.replace(match, ''+value)
 		}
 
 		// charval?    true
