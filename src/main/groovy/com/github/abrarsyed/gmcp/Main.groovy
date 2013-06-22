@@ -268,7 +268,6 @@ class Main
 				newLines = it.getValue().applyTo(currentLines)
 				text = newLines.join("\n")
 				it.getKey().write(text)
-				println "success "+it.getKey()
 				success++
 			}
 			catch(Exception e)

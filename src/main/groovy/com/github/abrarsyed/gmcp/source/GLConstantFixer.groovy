@@ -1281,6 +1281,8 @@ class GLConstantFixer
 				text = updateImports(text, 'org.lwjgl.opengl.' + it)
 			}
 		}
+		
+		return text
 	}
 
 	private static String annotateConstants(String text)
@@ -1316,11 +1318,11 @@ class GLConstantFixer
 	
 	private static String updateImports(String text, imp)
 	{
-		def prefix = "org.lwjgl.opengl.GL11"
+		def addAfter = "org.lwjgl.opengl.GL11"
 		
-		if (text.contains("import "+imp+";\n"))
+		if (!text.contains("import "+imp+";\n"))
 		{
-			text = text.replace("import "+prefix+";\n", "import "+prefix+";\n"+"import "+imp+";\n")
+			text = text.replace("(import "+addAfter+";\n)", "\1"+"import "+imp+";\n")
 		}
 		
 		return text

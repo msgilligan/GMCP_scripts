@@ -10,6 +10,9 @@ class FMLCleanup
 	public static void updateFile(File f)
 	{
 		def text = f.text
+		
+		if (f.getPath().contains("GuiMainMenu"))
+			println "WHAT!"
 
 		text.findAll(before) { match, group, words->
 			text = text.replace(match, group)
@@ -175,7 +178,7 @@ class FMLCleanup
 				type = type.replace('...', '[]')
 
 				while(type.contains("[][]"))
-					type = type.replace("[][]", "[]")
+					type = type.replaceAll(/\[\]\[\]/, "[]")
 
 				def name = type.toLowerCase()
 				def skip = 1
