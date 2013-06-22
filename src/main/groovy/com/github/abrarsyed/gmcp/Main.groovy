@@ -14,7 +14,6 @@ import net.md_5.specialsource.provider.JointProvider
 
 import com.github.abrarsyed.gmcp.Constants.OperatingSystem
 import com.github.abrarsyed.gmcp.source.FFPatcher
-import com.github.abrarsyed.gmcp.source.FMLCleanup
 import com.github.abrarsyed.gmcp.source.MCPCleanup
 import com.github.abrarsyed.gmcp.source.SourceRemapper
 import com.google.common.io.Files
@@ -34,73 +33,73 @@ class Main
 	{
 		os = Util.getOS()
 
-		println "cleaning up past builds...."
-		Util.createOrCleanDir(Constants.DIR_TEMP)
-		Util.createOrCleanDir(Constants.DIR_LOGS)
-
-		println "DOWNLOADING STUFF !!!!!!!!!!!!"
-
-		downloadStuff()
-
-		println "MERGING JARS !!!!!!!!!!!!"
-
-		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
-
-		println "FIXING PACKAGES!!!!!!!!"
-
-		// creates the package fixer
-		(new PackageFixer(new File(Constants.DIR_MAPPINGS, Constants.CSVS["packages"]))).with {
-			// calls the following on the package fixer.
-			// gotta love groovy :)
-			fixSRG(new File(Constants.DIR_MAPPINGS, "joined.srg"), new File(Constants.DIR_MAPPINGS, "packaged.srg"))
-			fixExceptor(new File(Constants.DIR_MAPPINGS, "joined.exc"), new File(Constants.DIR_MAPPINGS, "packaged.exc"))
-			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_ff.patch"))
-			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_server_ff.patch"))
-		}
-
-		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
-
-		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
-
-		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
-
-		inject()
-
-		println "UNZIPPING !!!!!!!!!!!!"
-
-		Util.unzip(Constants.JAR_EXCEPTOR, Constants.DIR_EXTRACTED, false)
-
-		println "COPYING CLASSES!!!!!!!"
-
-		copyClasses(Constants.DIR_EXTRACTED, Constants.DIR_CLASSES)
-
-		println "DECOMPILING !!!!!!!!!!!!"
-
-		decompile()
-
-		println "APPLY FF FIXES!!!!!!!"
-
-		FFPatcher.processDir(Constants.DIR_SOURCES)
+//		println "cleaning up past builds...."
+//		Util.createOrCleanDir(Constants.DIR_TEMP)
+//		Util.createOrCleanDir(Constants.DIR_LOGS)
+//
+//		println "DOWNLOADING STUFF !!!!!!!!!!!!"
+//
+//		downloadStuff()
+//
+//		println "MERGING JARS !!!!!!!!!!!!"
+//
+//		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
+//
+//		println "FIXING PACKAGES!!!!!!!!"
+//
+//		// creates the package fixer
+//		(new PackageFixer(new File(Constants.DIR_MAPPINGS, Constants.CSVS["packages"]))).with {
+//			// calls the following on the package fixer.
+//			// gotta love groovy :)
+//			fixSRG(new File(Constants.DIR_MAPPINGS, "joined.srg"), new File(Constants.DIR_MAPPINGS, "packaged.srg"))
+//			fixExceptor(new File(Constants.DIR_MAPPINGS, "joined.exc"), new File(Constants.DIR_MAPPINGS, "packaged.exc"))
+//			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_ff.patch"))
+//			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_server_ff.patch"))
+//		}
+//
+//		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
+//
+//		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
+//
+//		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
+//
+//		inject()
+//
+//		println "UNZIPPING !!!!!!!!!!!!"
+//
+//		Util.unzip(Constants.JAR_EXCEPTOR, Constants.DIR_EXTRACTED, false)
+//
+//		println "COPYING CLASSES!!!!!!!"
+//
+//		copyClasses(Constants.DIR_EXTRACTED, Constants.DIR_CLASSES)
+//
+//		println "DECOMPILING !!!!!!!!!!!!"
+//
+//		decompile()
+//
+//		println "APPLY FF FIXES!!!!!!!"
+//
+//		FFPatcher.processDir(Constants.DIR_SOURCES)
 
 		println "APPLYING MCP PATCHES!!!!!!!"
 
 		patchMCP()
-
-		println "FORMATTING SOURCES!!!!!!!!"
-
-		formatSources(Constants.DIR_SOURCES)
-
-		println "DOING FML FIXES!"
-
-		Constants.DIR_SOURCES.eachFileRecurse {
-			if (it.isFile())
-				FMLCleanup.updateFile(it)
-		}
-
-		println "APPLYING FML PATCHES =================================================="
-
-		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
-
+		//
+		//		println "FORMATTING SOURCES!!!!!!!!"
+		//
+		//		formatSources(Constants.DIR_SOURCES)
+		//
+		//		println "DOING FML FIXES!"
+		//
+		//		Constants.DIR_SOURCES.eachFileRecurse {
+		//			if (it.isFile())
+		//				FMLCleanup.updateFile(it)
+		//		}
+		//
+		//		println "APPLYING FML PATCHES =================================================="
+		//
+		//		applyPatches(Constants.DIR_FML_PATCHES, Constants.DIR_SOURCES)
+		//
 		//		println "RENAMING SOURCES TO NICE NAMES =================================================="
 		//
 		//		renameSources(Constants.DIR_SOURCES)
@@ -207,7 +206,6 @@ class Main
 
 		def patchMap = [:]
 		def patternDiff = /diff.*?minecraft\\(.+?) .*?/
-		def patternStart = /^\+\+\+/
 
 		def currentFile, startIndex = 0, endIndex = 0
 		rawPatch.eachWithIndex
@@ -215,32 +213,52 @@ class Main
 			def matcher = obj =~ patternDiff
 			if (matcher)
 			{
-				currentFile = matcher[0][1]
+				// check first null
+				if (currentFile == null)
+				{
+					currentFile = matcher[0][1]
+					startIndex = i+1
+				}
+
 				endIndex = i-1
 				if (endIndex > 0)
 				{
-					patchMap[currentFile] = DiffUtils.parseUnifiedDiff(rawPatch.subList(startIndex, endIndex))
+					def patchlist = rawPatch.subList(startIndex, endIndex)
+					patchMap[currentFile] = DiffUtils.parseUnifiedDiff(patchlist)
+
+					// for next one
+					currentFile = matcher[0][1]
+					startIndex = i+1
 					endIndex = 0
 				}
 				return
 			}
-
-			matcher = obj =~ patternStart
-			if (matcher)
-			{
-				startIndex = i+1
-			}
+				
 		}
 
-		def currentLines, newLines, text, file
+		print ""
+
+		def counter = 0, success = 0
 		patchMap.each
-		{
-			file = new File(Constants.DIR_SOURCES, it.getKey())
-			currentLines = file.text.readLines()
-			newLines = DiffUtils.patch(currentLines, it.getValue())
-			text = newLines.join("\n")
-			file.write(text)
+		{ file, delta ->
+			try
+			{
+				file = new File(Constants.DIR_SOURCES, file)
+				def lines = file.text.readLines()
+				lines = delta.applyTo(lines)
+				file.write(lines.join("\n"))
+				success++
+			}
+			catch(Exception e)
+			{
+				println "error patching "+file+"   skipping."
+				if (counter <= 1)
+					e.printStackTrace();
+			}
+			counter++
 		}
+
+		println success+" out of "+counter + " succeeded"
 	}
 
 	def static applyPatches(File from, File to)
@@ -259,25 +277,26 @@ class Main
 			}
 		}
 
-		def currentLines, newLines, text, file, counter = 0, success = 0
+		def counter = 0, success = 0
 		patchMap.each
-		{
+		{ file, delta ->
 			try
 			{
-				currentLines = it.getKey().text.readLines()
-				newLines = it.getValue().applyTo(currentLines)
-				text = newLines.join("\n")
-				it.getKey().write(text)
+				def lines = file.text.readLines()
+				lines = delta.applyTo(lines)
+				file.write(lines.join("\n"))
 				success++
 			}
 			catch(Exception e)
 			{
-				println "error patching "+it.getKey()+"   skipping."
+				println "error patching "+file+"   skipping."
+				if (counter <= 1)
+					e.printStackTrace();
 			}
 			counter++
 		}
 
-		println success+" out of "+counter
+		println success + " out of " + counter + " succeeded"
 	}
 
 	def static downloadStuff()
