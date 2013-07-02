@@ -14,7 +14,6 @@ import net.md_5.specialsource.provider.JarProvider
 import net.md_5.specialsource.provider.JointProvider
 
 import com.github.abrarsyed.gmcp.Constants.OperatingSystem
-import com.github.abrarsyed.gmcp.source.FFPatcher
 import com.github.abrarsyed.gmcp.source.MCPCleanup
 import com.github.abrarsyed.gmcp.source.SourceRemapper
 import com.google.common.io.Files
@@ -48,49 +47,49 @@ class Main
 
 		downloadStuff()
 
-		println "MERGING JARS !!!!!!!!!!!!"
-
-		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
-
-		println "FIXING PACKAGES!!!!!!!!"
-
-		// creates the package fixer
-		(new PackageFixer(new File(Constants.DIR_MAPPINGS, Constants.CSVS["packages"]))).with {
-			// calls the following on the package fixer.
-			// gotta love groovy :)
-			fixSRG(new File(Constants.DIR_MAPPINGS, "joined.srg"), new File(Constants.DIR_MAPPINGS, "packaged.srg"))
-			fixExceptor(new File(Constants.DIR_MAPPINGS, "joined.exc"), new File(Constants.DIR_MAPPINGS, "packaged.exc"))
-			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_ff.patch"))
-			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_server_ff.patch"))
-		}
-
-		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
-
-		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
-
-		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
-
-		inject()
-
-		println "UNZIPPING !!!!!!!!!!!!"
-
-		Util.unzip(Constants.JAR_EXCEPTOR, Constants.DIR_EXTRACTED, false)
-
-		println "COPYING CLASSES!!!!!!!"
-
-		copyClasses(Constants.DIR_EXTRACTED, Constants.DIR_CLASSES)
-
-		println "DECOMPILING !!!!!!!!!!!!"
-
-		decompile()
-
-		println "APPLY FF FIXES!!!!!!!"
-
-		FFPatcher.processDir(Constants.DIR_SOURCES)
-
-		println "APPLYING MCP PATCHES!!!!!!!"
-
-		patchMCP()
+		//		println "MERGING JARS !!!!!!!!!!!!"
+		//
+		//		mergeJars(Constants.JAR_CLIENT, Constants.JAR_SERVER)
+		//
+		//		println "FIXING PACKAGES!!!!!!!!"
+		//
+		//		// creates the package fixer
+		//		(new PackageFixer(new File(Constants.DIR_MAPPINGS, Constants.CSVS["packages"]))).with {
+		//			// calls the following on the package fixer.
+		//			// gotta love groovy :)
+		//			fixSRG(new File(Constants.DIR_MAPPINGS, "joined.srg"), new File(Constants.DIR_MAPPINGS, "packaged.srg"))
+		//			fixExceptor(new File(Constants.DIR_MAPPINGS, "joined.exc"), new File(Constants.DIR_MAPPINGS, "packaged.exc"))
+		//			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_ff.patch"))
+		//			fixPatch(new File(Constants.DIR_MCP_PATCHES, "minecraft_server_ff.patch"))
+		//		}
+		//
+		//		println "DeObfuscating With SpecialSource !!!!!!!!!!!!"
+		//
+		//		deobfuscate(Constants.JAR_MERGED, Constants.JAR_DEOBF)
+		//
+		//		println "Applying Exceptor (MCInjector) !!!!!!!!!!!!"
+		//
+		//		inject()
+		//
+		//		println "UNZIPPING !!!!!!!!!!!!"
+		//
+		//		Util.unzip(Constants.JAR_EXCEPTOR, Constants.DIR_EXTRACTED, false)
+		//
+		//		println "COPYING CLASSES!!!!!!!"
+		//
+		//		copyClasses(Constants.DIR_EXTRACTED, Constants.DIR_CLASSES)
+		//
+		//		println "DECOMPILING !!!!!!!!!!!!"
+		//
+		//		decompile()
+		//
+		//		println "APPLY FF FIXES!!!!!!!"
+		//
+		//		FFPatcher.processDir(Constants.DIR_SOURCES)
+		//
+		//		println "APPLYING MCP PATCHES!!!!!!!"
+		//
+		//		patchMCP()
 		//
 		//		println "FORMATTING SOURCES!!!!!!!!"
 		//
@@ -319,29 +318,33 @@ class Main
 
 		// TODO: Downlaod forge, and then read forge configs for it.
 
-		println "Downloading Minecraft"
-		def mcver = MC_VERSION.replaceAll(/\./, /_/)
-		Util.download(String.format(Constants.URL_MC_JAR, mcver), Constants.JAR_CLIENT)
-		Util.download(String.format(Constants.URL_MCSERVER_JAR, mcver), Constants.JAR_SERVER)
-
-		println "Downloading libraries"
-		Constants.LIBRARIES.each {
-			Util.download(Constants.URL_LIB_ROOT + it, new File(root, it))
-		}
-
-		println "Downloading natives"
-		def nativesJar = new File(Constants.DIR_TEMP, "natives.jar")
-		Util.download(Constants.URL_LIB_ROOT+Constants.NATIVES[os.toString()], nativesJar)
-
-		Util.unzip(nativesJar, new File(root, "natives"), true)
-		nativesJar.delete()
-
 		println "Downloading Forge"
 		def forge = new File(Constants.DIR_TEMP, "forge.zip")
 		//Util.download(ForgeVersionGetter.getUrl(MC_VERSION), forge)
 		Util.download(String.format(Constants.URL_FORGE, MC_VERSION, FORGE_VERSION), forge)
 		Util.unzip(forge, Constants.DIR_TEMP, true)
 		forge.delete()
+
+		// read config
+		ConfigParser parser = new ConfigParser(new File(Constants.DIR_FML.path, "mc_versions.cfg"))
+		def baseUrl = parser.getProperty("default", "base_url")
+
+		println "Downloading Minecraft"
+		def mcver = parser.getProperty("default", "current_ver")
+		Util.download(parser.getProperty(mcver, "client_url"), Constants.JAR_CLIENT)
+		Util.download(parser.getProperty(mcver, "server_url"), Constants.JAR_SERVER)
+
+		println "Downloading libraries"
+		def dls = parser.getProperty("default", "libraries").split(/\s/)
+		dls.each { Util.download(baseUrl+it, new File(root, it)) }
+
+		println "Downloading natives"
+		def nativesJar = new File(Constants.DIR_TEMP, "natives.jar")
+		def nativesName = parser.getProperty("default", "natives").split(/\s/)[os.ordinal()]
+		Util.download(baseUrl + nativesName, nativesJar)
+
+		Util.unzip(nativesJar, new File(root, "natives"), true)
+		nativesJar.delete()
 	}
 
 	def static renameSources(File dir)

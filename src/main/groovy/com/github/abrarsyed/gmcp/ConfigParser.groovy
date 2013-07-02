@@ -1,15 +1,14 @@
 package com.github.abrarsyed.gmcp
 
-import java.util.HashMap;
 
 class ConfigParser
 {
-	private String file;
+	private File file
 	private final category = /\[(.*?)\]/
 	private final property = /\s?(.+?)\s=\s(.+)\s?/
 	HashMap<String, HashMap<String, String>> map
 
-	public ConfigParser(String file)
+	public ConfigParser(File file)
 	{
 		this.file = file
 		read()
@@ -17,26 +16,26 @@ class ConfigParser
 
 	public void read()
 	{
-		map = new HashMap();
+		map = new HashMap()
 
-		def match, inMap, currentCat;
-		new File(file).eachLine
+		def match, inMap, currentCat
+		file.eachLine
 		{
 			// skip it.
 			if (it.isEmpty() || it.isAllWhitespace())
-				return;
+				return
 
 			// category
 			if (it ==~ category)
 			{
-				currentCat = (it =~ category)[0][1];
-				map.put(currentCat, new HashMap<String, String>());
+				currentCat = (it =~ category)[0][1]
+				map.put(currentCat, new HashMap<String, String>())
 				//println currentCat
-				return;
+				return
 			}
 			else if (it =~ property)
 			{
-				match = it =~ property;
+				match = it =~ property
 				map.get(currentCat).put(match[0][1].trim(), match[0][2].trim())
 				//println match[0][1].trim()+"="+match[0][2].trim()
 			}

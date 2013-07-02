@@ -27,27 +27,10 @@ public final class Constants
 	public static final File	JAR_EXCEPTOR		= new File(DIR_TEMP, "Minecraft_EXC.jar")
 
 	// download URLs    versions are in #_#_# form rather than #.#.#
-	public static final String 	URL_MC_JAR 			= "http://assets.minecraft.net/%s/minecraft.jar"
-	public static final String 	URL_MCSERVER_JAR 	= "http://assets.minecraft.net/%s/minecraft_server.jar"
-	public static final String 	URL_LIB_ROOT 		= "http://s3.amazonaws.com/MinecraftDownload/"
 	public static final String	URL_JSON_FORGE 		= "http://files.minecraftforge.net/minecraftforge/json"
 
 	// normal MC version form
 	public static final String 	URL_FORGE 			= "http://files.minecraftforge.net/minecraftforge/minecraftforge-src-%s-%s.zip"
-
-	// lib names
-	public static final LIBRARIES = [
-		"lwjgl.jar",
-		"lwjgl_util.jar",
-		"jinput.jar"
-	]
-
-	// natives
-	public static final NATIVES = [
-		WINDOWS:"windows_natives.jar",
-		MAC: "macosx_natives.jar",
-		LINUX: "linux_natives.jar"
-	]
 
 	// CSVs
 	public static final CSVS = [
